@@ -5,7 +5,7 @@ import './ERC23.sol';
 import './Basic23Token.sol';
 import './validation/Valid.sol';
 import './ERC23Receiver.sol';
-import '../../zeppelin-solidity/contracts/token/ERC20Basic.sol';
+import '../installed_contracts/zeppelin-solidity/contracts/token/StandardToken.sol';
 
 /**
  * @title Standard ERC23 token

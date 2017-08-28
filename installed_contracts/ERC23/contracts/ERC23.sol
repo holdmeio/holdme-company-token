@@ -1,6 +1,6 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.13;
 
-import '../../zeppelin-solidity/contracts/token/ERC20Basic.sol';
+import '../installed_contracts/zeppelin-solidity/contracts/token/ERC20.sol';
 
  /**
  * @title ERC23 additions to ERC20
