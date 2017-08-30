@@ -63,8 +63,7 @@ contract HoldmeTokenSale is Ownable {
     uint256 _shareDev,
     uint256 _shareAdvisor,
     uint256 _shareBeneficiary
-  )
-  { 
+  ) { 
     startTimePreLaunch = _startTimePreLaunch;
     endTimePreLaunch = endTimePreLaunch + DURATION_PRELAUNCH;
     startTime = _startTime;
@@ -141,8 +140,11 @@ contract HoldmeTokenSale is Ownable {
     public
     payable
     between
+    tokenMaxCapNotReached
     returns (uint256 amount)
   {
+    require(_contributer != 0x0);
+    require(msg.value!=0);
     uint256 discount = 0;
     uint256 tokenAmount = computeReturn(msg.value, discount);
     processContribution(_contributer, tokenAmount);
@@ -159,8 +161,11 @@ contract HoldmeTokenSale is Ownable {
         public
         payable
         onlyOwner
+        tokenMaxCapNotReached
         returns (uint256 amount)
     {
+      require(_contributer != 0x0);
+      require(msg.value!=0);
       uint256 discount = 0;
       uint256 tokenAmount = computeReturn(msg.value.mul(_btcToEthPrice), discount);
       processContribution(_contributer, tokenAmount);

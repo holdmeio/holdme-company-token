@@ -29,8 +29,8 @@ contract Holdme is Ownable, Standard23Token {
   address public owner;
 
 
-  function Holdme(address _centralAdmin){
-    if (_centralAdmin != 0){
+  function Holdme(address _centralAdmin) {
+    if (_centralAdmin != 0) {
       owner = _centralAdmin;
     } else {
       owner = msg.sender;
