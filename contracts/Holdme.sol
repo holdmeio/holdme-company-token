@@ -40,5 +40,5 @@ contract Holdme is Ownable, Standard23Token {
     // Balance of Token address will be 100% of the HME company shares when initialize the contract 
     this.balance = totalSupply;
   }
-  
+    
 }
