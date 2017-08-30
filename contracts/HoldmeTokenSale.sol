@@ -12,7 +12,7 @@ pragma solidity ^0.4.15;
 
 import './Holdme.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol';
-import '../installed_contracts/ERC23/installed_contractszeppelin-solidity/contracts/math/SafeMath.sol';
+import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract HoldmeTokenSale is Ownable {
   using SafeMath for uint256;
@@ -21,6 +21,7 @@ contract HoldmeTokenSale is Ownable {
   uint256 public constant DURATION = 60 days;           // crowdsale duration
   uint256 public constant TOKEN_PRICE_N = 1;            // initial price in wei (numerator)
   uint256 public constant TOKEN_PRICE_D = 100;          // initial price in wei (denominator)
+  uint256 public constant MAX_GAS_PRICE = 50000000000 wei;    // maximum gas price for contribution transactions
 
   Holdme public token;                                  // The token
 
@@ -44,10 +45,26 @@ contract HoldmeTokenSale is Ownable {
   address public devtree = 0x0;                   // address Developer 3 to receive 3% Company Share
   address public advisor = 0x0;                   // address Advisor to receive 8% Company Share
 
+  uint256 public shareDev = 0;
+  uint256 public shareAdvisor = 0;
+  uint256 public shareBeneficiary = 0;
+
   // triggered on each contribution
   event Contribution(address indexed _contributor, uint256 _amount, uint256 _return);
 
-  function HoldmeTokenSale (uint256 _startTimePreLaunch, uint256 _startTime, address _beneficiary, address _devone, address _devtwo, address _devthree, address _advisor) { 
+  function HoldmeTokenSale (
+    uint256 _startTimePreLaunch,
+    uint256 _startTime, 
+    address _beneficiary, 
+    address _devone, 
+    address _devtwo, 
+    address _devthree, 
+    address _advisor,
+    uint256 _shareDev,
+    uint256 _shareAdvisor,
+    uint256 _shareBeneficiary
+  )
+  { 
     startTimePreLaunch = _startTimePreLaunch;
     endTimePreLaunch = endTimePreLaunch + DURATION_PRELAUNCH;
     startTime = _startTime;
@@ -57,6 +74,9 @@ contract HoldmeTokenSale is Ownable {
     devtwo = _devtwo;
     devtree = _devthree;
     advisor = _advisor;
+    shareDev = _shareDev;
+    shareAdvisor = _shareAdvisor;
+    shareBeneficiary = _shareBeneficiary;
     token = Holdme(msg.sender);
     sendShares();
   }
@@ -75,8 +95,8 @@ contract HoldmeTokenSale is Ownable {
 
   // ensures that the current time is between _startTime (inclusive) and _endTime (exclusive)
   modifier between() {
-    assert((now >= startTimePreLaunch && now < endTimePreLaunch)) || 
-    (now >= startTime && now < endTime);
+    assert((now >= startTimePreLaunch && now < endTimePreLaunch) || 
+           (now >= startTime && now < endTime));
     _;
   }
 
@@ -91,15 +111,19 @@ contract HoldmeTokenSale is Ownable {
     return (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N.mul(_discount));
   }
 
+  function percent(uint256 numerator, uint256 denominator, uint256 precision) private constant returns(uint quotient) {
+    // caution, check safe-to-multiply here
+    uint256 _numerator  = numerator * 10 ** (precision.add(1));
+    // with rounding of last digit
+    uint256 _quotient =  ((_numerator / denominator) + 5).div(10);
+      return ( _quotient);
+  }
+
   /**
     Sending Company shares for the Team
     Only executed in constructor
   */
   function sendShares() private {
-    uint256 shareDev = token.totalSupply.mul(0.03);
-    uint256 shareAdvisor = token.totalSupply.mul(0.08);
-    uint256 shareBeneficiary = token.totalSupply.mul(0.51);
-
     token.transfer(devone, shareDev);               // Developer one receives 3% shares of the Company
     token.transfer(devtwo, shareDev);               // Developer two receives 3% shares of the Company
     token.transfer(devtree, shareDev);              // Developer three receives 3% shares of the Company
@@ -116,15 +140,13 @@ contract HoldmeTokenSale is Ownable {
   function contributeETH(address _contributer)
     public
     payable
-    between()
+    between
     returns (uint256 amount)
   {
     uint256 discount = 0;
-    if (preLaunch == true) {
-      discount = 0.35;
-    }
     uint256 tokenAmount = computeReturn(msg.value, discount);
-    return processContribution(_contributer, tokenAmount);
+    processContribution(_contributer, tokenAmount);
+    return tokenAmount;
   }
 
   /**
@@ -136,15 +158,13 @@ contract HoldmeTokenSale is Ownable {
     function contributeBTC(address _contributer, uint256 _btcToEthPrice)
         public
         payable
-        onlyOwner()
+        onlyOwner
         returns (uint256 amount)
     {
-        uint256 discount = 0;
-        if (preLaunch == true) {
-          discount = 0.35;
-        }
-        uint256 tokenAmount = computeReturn(msg.value.mul(_btcToEthPrice), discount);
-        return processContribution(_contributer, tokenAmount);
+      uint256 discount = 0;
+      uint256 tokenAmount = computeReturn(msg.value.mul(_btcToEthPrice), discount);
+      processContribution(_contributer, tokenAmount);
+      return tokenAmount;
     }
 
   /**
@@ -154,18 +174,16 @@ contract HoldmeTokenSale is Ownable {
     @return tokens issued in return
   */
   function processContribution(address _contributer, uint256 _tokenAmount) private
-    active
+    onlyOwner
     tokenMaxCapNotReached()
     validGasPrice
-    returns (uint256 amount)
   {
     assert(beneficiary.send(msg.value)); // transfer the ether to the beneficiary account
     totalEtherContributed = totalEtherContributed.add(msg.value);// update the total contribution amount
     token.transfer(_contributer, _tokenAmount); // issue new funds to the contributor in the smart token
-    totalTokenIssued = totalTokenIssued.add(tokenAmount);
+    totalTokenIssued = totalTokenIssued.add(_tokenAmount);
 
-    Contribution(msg.sender, msg.value, tokenAmount);
-    return tokenAmount;
+    Contribution(msg.sender, msg.value, _tokenAmount);
   }
 
   // fallback when investor transfering Ether to the crowdsale contract without calling any functions

@@ -17,7 +17,7 @@ pragma solidity ^0.4.15;
 
 import '../installed_contracts/ERC23/contracts/Standard23Token.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol';
-import '../installed_contracts/ERC23/installed_contractszeppelin-solidity/contracts/math/SafeMath.sol';
+import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
 
 
 contract Holdme is Ownable, Standard23Token {
@@ -38,7 +38,7 @@ contract Holdme is Ownable, Standard23Token {
     // 100% HME company shares = 300.000.000 HME Tokens
     totalSupply = 300000000 * 10**18;
     // Balance of Token address will be 100% of the HME company shares when initialize the contract 
-    this.balance = totalSupply;
+    balances[this] = totalSupply;
   }
-    
+
 }
