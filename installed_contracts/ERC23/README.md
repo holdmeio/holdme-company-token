@@ -42,9 +42,12 @@ https://etherscan.io/token/FirstBlood?a=0xaf30d2a7e90d7dc361c8c4585e9bb7d2f6f15b
 30 MLN in Melonport contract ~ $1197:
 https://etherscan.io/token/Melon?a=0xBEB9eF514a379B997e0798FDcC901Ee474B6D9A1+
 
-### Unit testing scenario's Basic23Token
-1. BasicToken #1 should return the correct totalSupply after construction
-[X] totalSupply = 100
+# Unit Test
+
+## Unit testing scenario's Basic23Token
+
+### Basic23Token #1 should return the correct totalSupply after construction
+* [X] totalSupply = 100
 
 **Console Output:**
 ```
@@ -57,11 +60,11 @@ The balance of the MAIN_ACCOUNT  should be 100
     ✓ Basic23Token #1 should return the correct totalSupply after construction (139ms)
 ```
 
-2. BasicToken #2 should return correct balances after transfer
-[X] Bob (main account) has 100 tokens
-[X] Bob transer 100 tokens to Alice
-[X] Bob has 0 tokens left
-[X] Alice has received 100 tokens
+### Basic23Token #2 should return correct balances after transfer
+* [X] Bob (main account) has 100 tokens
+* [X] Bob transer 100 tokens to Alice
+* [X] Bob has 0 tokens left
+* [X] Alice has received 100 tokens
 
 **Console Output:**
 ```
@@ -73,11 +76,13 @@ Try to transfer 100 from MAIN_ACCOUNT to RECEIVING_ACCOUNT
     ✓ Basic23Token #2 should return correct balances after transfer (217ms)
 ```
 
-3. Basic23Token #3 should throw an error when trying to transfer less than 0
-[X] Bob (main account) has 100 tokens
-[X] Bob try to transer -2 tokens to Alice
-[X] Bob still have  100 tokens left
-[X] Alice still have 100 tokens
+### Basic23Token #3 should throw an error when trying to transfer less than 0
+* [X] Bob (main account) has 100 tokens
+* [X] Alice have 0 tokens
+* [X] Bob try to transer -2 tokens to Alice
+* [X] Throw an error when trying to transfer less than 0 
+* [X] Bob still have  100 tokens left
+* [X] Alice still have 0 tokens
 
 **Console Output:**
 ```
@@ -91,5 +96,263 @@ ReceivingAccountBalanceAfterTransfer =0
     ✓ Basic23Token #3 should throw an error when trying to transfer less than 0 (179ms)
 ```
 
- ### Unit testing scenario's Standard23Token   
+### Basic23Token #4 should throw an error when trying to transfer more than balance
+* [X] Bob (main account) has 100 tokens
+* [X] Alice still have 0 tokens
+* [X] Bob try to transer 101 tokens to Alice
+* [X] Throw an error when trying to transfer more than account balance 
+* [X] Bob still have  100 tokens left
+* [X] Alice still have 0 tokens
 
+
+**Console Output:**
+```
+Basic23Token #4 BEGIN==========================================================
+MAIN_ACCOUNT tries to transfer 101 token to RECEIVING_ACCOUNT while TRANSFER_AMOUNT is greater than than balance of MAIN_ACCOUNT
+mainAccountBalanceBeforeTransfer=100
+ReceivingAccountBalanceBeforeTransfer=0
+Try to transfer 101 from MAIN_ACCOUNT to RECEIVING_ACCOUNT
+mainAccountBalanceAfterTransfer =100
+ReceivingAccountBalanceAfterTransfer =0
+    ✓ Basic23Token #4 should throw an error when trying to transfer more than balance (205ms)
+```
+
+
+### Basic23Token #5 should throw an error when trying to transfer without any tokens
+* [X] Bob (main account) has 0 tokens
+* [X] Alice still have 0 tokens
+* [X] Bob try to transer 100 tokens to Alice
+* [X] Throw an error when trying to transfer more than account balance 
+* [X] Bob still have  0 tokens left
+* [X] Alice still have 0 tokens
+
+
+**Console Output:**
+```
+Basic23Token #5 BEGIN==========================================================
+MAIN_ACCOUNT tries to transfer 100 token to RECEIVING_ACCOUNT while MAIN_ACCOUNT does not have any tokens
+mainAccountBalanceBeforeTransfer=0
+ReceivingAccountBalanceBeforeTransfer=0
+Try to transfer 100 from MAIN_ACCOUNT to RECEIVING_ACCOUNT
+mainAccountBalanceAfterTransfer =0
+ReceivingAccountBalanceAfterTransfer =0
+    ✓ Basic23Token #5 should throw an error when trying to transfer without any tokens (220ms)
+```
+
+
+### Basic23Token #6 should throw an error when trying to transfer to 0x0
+* [X] Bob (main account) has 100 tokens
+* [X] Bob try to transer 100 tokens to 0x0
+* [X] Throw an error when trying to transfer to 0x0
+* [X] Bob still have  100 tokens left
+
+**Console Output:**
+```
+Basic23Token #6 BEGIN==========================================================
+mainAccountBalanceBeforeTransfer=100
+Try to transfer 100 from MAIN_ACCOUNT to 0x0
+mainAccountBalanceAfterTransfer =100
+    ✓ "Basic23Token #6 should throw an error when trying to transfer to 0x0 (128ms)
+```
+
+ ## Unit testing scenario's Standard23Token   
+
+ ### Standard23Token #1 should return the correct totalSupply after construction
+* [X] totalSupply = 100
+
+
+**Console Output:**
+```
+Standard23Token #1 BEGIN==========================================================
+What is the totalSupply of the created Token?
+The totalSupply of the created Token should equal to 100
+What is the balance of MAIN_ACCOUNT?
+The balance of the MAIN_ACCOUNT  should be 100
+    ✓ Standard23Token #1 should return the correct totalSupply after construction (114ms)
+```
+
+### Standard23Token #2 should return the correct allowance amount after approval
+* [X] Bob (main account) has 100 tokens
+* [X] Alice (spender) still have 0 tokens
+* [X] Bob gives approval to Alice to be able to  transfer 40
+* [X] Allowance of Alice must be 40
+* [X] Bob still have  100 tokens left
+* [X] Alice still have 0 tokens
+
+
+**Console Output:**
+```
+Standard23Token #2 BEGIN==========================================================
+SPENDER_ACCOUNT allowed to transfer 40 because SPENDER_ACCOUNT has 40 approved amount
+mainAccountBalanceBeforeTransfer=100
+spenderAccountBalanceBeforeTransfer=0
+APPROVE_AMOUNT = 40
+Allowance = 40  of SPENDER_ACCOUNT
+mainAccountBalanceAfterTransfer = 100
+spenderAccountBalanceAfterTransfer = 0
+    ✓ Standard23Token #2 should return the correct allowance amount after approval (218ms)
+```
+
+### Standard23Token #3 should return correct balances after transfering from another account
+* [X] Bob (main account) has 100 tokens
+* [X] Alice (spender) have 0 tokens
+* [X] Chris (receiver) have 0 tokens
+* [X] Bob gives approval to Alice to be able to transferFrom 40
+* [X] Allowance of Alice must be 40
+* [X] Alice transfer 40 tokens to Chris
+* [X] Bob will have 60 tokens left
+* [X] Chris will have 40 tokens left
+* [X] Alice still have 0 tokens
+
+**Console Output:**
+```
+Standard23Token #3 BEGIN==========================================================
+mainAccountBalanceBeforeTransfer=100
+ReceivingAccountBalanceBeforeTransfer=0
+spenderAccountBalanceBeforeTransfer=0
+APPROVE_AMOUNT = 40
+Allowance = 40  of SPENDER_ACCOUNT
+mainAccountBalanceAfterTransfer =60
+ReceivingAccountBalanceAfterTransfer = 40
+spenderAccountBalanceAfterTransfer = 0
+    ✓ Standard23Token #3 should return correct balances after transfering from another account (341ms)
+```
+
+### Standard23Token #4 should throw an error when trying to transfer more than allowed
+* [X] Bob (main account) has 99 tokens
+* [X] Alice (spender) have 0 tokens
+* [X] Chris (receiver) have 0 tokens
+* [X] Bob gives approval to Alice to be able to transferFrom 99
+* [X] Alice transfer 100 tokens to Chris
+* [X] Throw an error when trying to transferFrom more than allowed
+* [X] Bob still have 99 tokens left
+* [X] Chris will have 0 tokens left
+* [X] Alice still have 0 tokens
+
+**Console Output:**
+```
+Standard23Token #4 BEGIN==========================================================
+mainAccountBalanceBeforeTransfer=99
+ReceivingAccountBalanceBeforeTransfer=0
+spenderAccountBalanceBeforeTransfer=0
+APPROVE_AMOUNT 99
+Try to TransferFrom 100 MAIN_ACCOUNT to RECEIVING_ACCOUNT from SPENDER_ACCOUNT
+mainAccountBalanceAfterTransfer =99
+ReceivingAccountBalanceAfterTransfer =0
+spenderAccountBalanceAfterTransfer =0
+    ✓ Standard23Token #4 should throw an error when trying to transfer more than allowed (274ms)
+```
+
+
+### Standard23Token #5 should throw an error when trying to transfer when not allowed
+* [X] Bob (main account) has 100 tokens
+* [X] Alice (spender) have 0 tokens
+* [X] Chris (receiver) have 0 tokens
+* [X] Alice transfer 100 tokens to Chris without approval
+* [X] Throw an error when trying to transferFrom with no allowance
+* [X] Bob still have 99 tokens left
+* [X] Chris will have 0 tokens left
+* [X] Alice still have 0 tokens
+
+**Console Output:**
+```
+Standard23Token #5 BEGIN==========================================================
+mainAccountBalanceBeforeTransfer=100
+ReceivingAccountBalanceBeforeTransfer=0
+spenderAccountBalanceBeforeTransfer=0
+Try to TransferFrom 100 MAIN_ACCOUNT to RECEIVING_ACCOUNT from SPENDER_ACCOUNT
+mainAccountBalanceAfterTransfer =100
+ReceivingAccountBalanceAfterTransfer =0
+spenderAccountBalanceAfterTransfer =0
+    ✓ Standard23Token #5 should throw an error when trying to transfer when not allowed (240ms)
+```
+
+
+### Standard23Token #6 should throw an error when trying to transfer less than 0
+* [X] Bob (main account) has 100 tokens
+* [X] Alice (spender) have 0 tokens
+* [X] Chris (receiver) have 0 tokens
+* [X] Bob gives approval to Alice to be able to transferFrom 100
+* [X] Alice transfer -1 tokens to Chris
+* [X] Throw an error when trying to transferFrom less than 0
+* [X] Bob still have 100 tokens left
+* [X] Chris will have 0 tokens left
+* [X] Alice still have 0 tokens
+
+**Console Output:**
+```
+Standard23Token #6 BEGIN==========================================================
+mainAccountBalanceBeforeTransfer=100
+ReceivingAccountBalanceBeforeTransfer=0
+spenderAccountBalanceBeforeTransfer=0
+APPROVE_AMOUNT 100
+Try to TransferFrom -1 MAIN_ACCOUNT to RECEIVING_ACCOUNT from SPENDER_ACCOUNT
+mainAccountBalanceAfterTransfer =100
+ReceivingAccountBalanceAfterTransfer =0
+spenderAccountBalanceAfterTransfer =0
+    ✓ Standard23Token #6 should throw an error when trying to transfer less than 0 (297ms)
+```
+
+
+### Standard23Token #7 should throw an error when trying to transfer more than supply
+* [X] Bob (main account) has 100 tokens
+* [X] Alice (spender) have 0 tokens
+* [X] Chris (receiver) have 0 tokens
+* [X] Bob gives approval to Alice to be able to  transfer 101
+* [X] Alice transfer 101 tokens to Chris
+* [X] Throw an error when trying to transferFrom more than supply
+* [X] Bob still have 100 tokens left
+* [X] Chris will have 0 tokens left
+* [X] Alice still have 0 tokens
+
+**Console Output:**
+```
+Standard23Token #7 BEGIN==========================================================
+mainAccountBalanceBeforeTransfer=100
+ReceivingAccountBalanceBeforeTransfer=0
+spenderAccountBalanceBeforeTransfer=0
+APPROVE_AMOUNT 101
+Try to TransferFrom 101 MAIN_ACCOUNT to RECEIVING_ACCOUNT from SPENDER_ACCOUNT
+mainAccountBalanceAfterTransfer =100
+ReceivingAccountBalanceAfterTransfer =0
+spenderAccountBalanceAfterTransfer =0
+    ✓ Standard23Token #7 should throw an error when trying to transfer more than supply (312ms)
+```
+
+### Standard23Token #8 should throw an error when trying to transferFrom to 0x0
+* [X] Bob (main account) has 100 tokens
+* [X] Alice (spender) have 0 tokens
+* [X] Bob gives approval to Alice to be able to  transferFrom 100
+* [X] Alice transfer 100 tokens to 0x0
+* [X] Throw an error when trying to transferFrom to 0x0 
+* [X] Bob still have 100 tokens left
+* [X] Alice still have 0 tokens
+
+**Console Output:**
+```
+Standard23Token #8 BEGIN==========================================================
+mainAccountBalanceBeforeTransfer=100
+spenderAccountBalanceBeforeTransfer=0
+APPROVE_AMOUNT = 40
+mainAccountBalanceAfterTransfer =100
+spenderAccountBalanceAfterTransfer =0
+    ✓ Standard23Token #8 should throw an error when trying to transferFrom to 0x0 (213ms)
+```
+
+### Standard23Token #9 Approval should start with zero and should increase by 50 then decrease by 10
+* [X] Pre approved amount should be 0
+* [X] Increse approval with 50
+* [X] Post increse allowance should be 50
+* [X] Increse approval by 10
+* [X] Post Decrease allowance should be 40
+
+**Console Output:**
+```
+Standard23Token #9 validating allowance updates to spender
+preApproved = 0
+Increse approval to  50
+PostIncrese allowance = 50
+Increse approval by 10
+postDecrease allowance = 40
+      ✓ Approval should start with zero and should increase by 50 then decrease by 10 (197ms)
+```

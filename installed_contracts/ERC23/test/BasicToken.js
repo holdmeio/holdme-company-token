@@ -87,9 +87,9 @@ contract('Basic23Token', function(accounts) {
     }
     assert.fail('should have thrown before');
   });
-/*
-  it("BasicToken #4 should throw an error when trying to transfer more than balance", async function() {
-    console.log("BasicToken #4 BEGIN==========================================================");
+
+  it("Basic23Token #4 should throw an error when trying to transfer more than balance", async function() {
+    console.log("Basic23Token #4 BEGIN==========================================================");
 
     var HIGH_TRANSFER_AMOUNT = INITAL_SUPPLY +1;
     console.log("MAIN_ACCOUNT tries to transfer " +HIGH_TRANSFER_AMOUNT +" token to RECEIVING_ACCOUNT while TRANSFER_AMOUNT is greater than than balance of MAIN_ACCOUNT");
@@ -121,16 +121,17 @@ contract('Basic23Token', function(accounts) {
     assert.fail('should have thrown before');
   });
 
-  it("BasicToken #5 should throw an error when trying to transfer without any tokens", async function() {
-    console.log("BasicToken #5 BEGIN==========================================================");
+  
+  it("Basic23Token #5 should throw an error when trying to transfer without any tokens", async function() {
+    console.log("Basic23Token #5 BEGIN==========================================================");
     console.log("MAIN_ACCOUNT tries to transfer " +TRANSFER_AMOUNT +" token to RECEIVING_ACCOUNT while MAIN_ACCOUNT does not have any tokens");
 
-    let token = await BasicTokenMock.new();
+    let token = await BasicTokenMock.new(MAIN_ACCOUNT, 0);
 
     let mainAccountBalanceBeforeTransfer = await token.balanceOf(MAIN_ACCOUNT);
     console.log("mainAccountBalanceBeforeTransfer=" +mainAccountBalanceBeforeTransfer);
     assert.equal(mainAccountBalanceBeforeTransfer, 0);
-
+    
     let ReceivingAccountBalanceBeforeTransfer = await token.balanceOf(RECEIVING_ACCOUNT);
     console.log("ReceivingAccountBalanceBeforeTransfer=" +ReceivingAccountBalanceBeforeTransfer);
     assert.equal(ReceivingAccountBalanceBeforeTransfer, 0);
@@ -152,37 +153,26 @@ contract('Basic23Token', function(accounts) {
     assert.fail('should have thrown before');
   });
 
-  it("BasicToken #6 should throw an error when trying to transfer while transfer amount is NULL", async function() {
-    console.log("BasicToken #6 BEGIN==========================================================");
-
-    var nullTransfer = null;
-    console.log("MAIN_ACCOUNT tries to transfer " +nullTransfer +" token to RECEIVING_ACCOUNT");
+   it('"Basic23Token #6 should throw an error when trying to transfer to 0x0', async function() {
+    console.log("Basic23Token #6 BEGIN==========================================================");
 
     let token = await BasicTokenMock.new(MAIN_ACCOUNT, INITAL_SUPPLY);
 
     let mainAccountBalanceBeforeTransfer = await token.balanceOf(MAIN_ACCOUNT);
-    console.log("mainAccountBalanceBeforeTransfer =" +mainAccountBalanceBeforeTransfer);
+    console.log("mainAccountBalanceBeforeTransfer=" +mainAccountBalanceBeforeTransfer);
     assert.equal(mainAccountBalanceBeforeTransfer, INITAL_SUPPLY);
-
-    let ReceivingAccountBalanceBeforeTransfer = await token.balanceOf(RECEIVING_ACCOUNT);
-    console.log("ReceivingAccountBalanceBeforeTransfer =" +ReceivingAccountBalanceBeforeTransfer);
-    assert.equal(ReceivingAccountBalanceBeforeTransfer, 0);
+    
 
     try {
-      console.log("Try to transfer " +nullTransfer +" from MAIN_ACCOUNT to RECEIVING_ACCOUNT");
-      await token.transfer(RECEIVING_ACCOUNT, nullTransfer);
+      console.log("Try to transfer " +TRANSFER_AMOUNT +" from MAIN_ACCOUNT to 0x0");
+      let transfer = await token.transfer(0x0, TRANSFER_AMOUNT);
+      assert.fail('should have thrown before');
     } catch(error) {
       let mainAccountBalanceAfterTransfer = await token.balanceOf(MAIN_ACCOUNT);
       console.log("mainAccountBalanceAfterTransfer =" +mainAccountBalanceAfterTransfer);
       assert.equal(mainAccountBalanceAfterTransfer, INITAL_SUPPLY);
-
-      let ReceivingAccountBalanceAfterTransfer = await token.balanceOf(RECEIVING_ACCOUNT);
-      console.log("ReceivingAccountBalanceAfterTransfer =" +ReceivingAccountBalanceAfterTransfer);
-      assert.equal(ReceivingAccountBalanceAfterTransfer, 0);
-      
-      return assertJump(error);
+      assertJump(error);
     }
-    assert.fail('should have thrown before');
-  });*/
+  });
 
 });
