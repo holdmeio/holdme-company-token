@@ -49,8 +49,12 @@ contract HoldmeTokenSale is Ownable {
   uint256 public shareAdvisor = 0;
   uint256 public shareBeneficiary = 0;
 
+  bool public isFinalized = false;
+
+
   // triggered on each contribution
   event Contribution(address indexed _contributor, uint256 _amount, uint256 _return);
+  event Finalized();
 
   function HoldmeTokenSale (
     uint256 _startTimePreLaunch,
@@ -192,9 +196,39 @@ contract HoldmeTokenSale is Ownable {
   }
 
   // fallback when investor transfering Ether to the crowdsale contract without calling any functions
-    function() payable {
-    contributeETH(msg.sender);
-    }
+  function() payable {
+  contributeETH(msg.sender);
+  }
+  
+  // @return true if crowdsale event has ended
+  function hasEnded() public constant returns (bool) {
+    return now > endTime;
+  }
 
- }
- 
+  /**
+   * @dev Must be called after crowdsale ends, to do some extra finalization
+   * work. Calls the contract's finalization function.
+   */
+  function finalize() onlyOwner {
+    require(!isFinalized);
+    require(hasEnded());
+
+    finalization();
+    Finalized();
+    
+    isFinalized = true;
+  }
+
+  /**
+   * @dev Can be overriden to add finalization logic. The overriding function
+   * should call super.finalization() to ensure the chain of finalization is
+   * executed entirely.
+   */
+  function finalization() internal {
+    token.transfer(devone, shareDev);               // Developer one receives 3% shares of the Company
+    token.transfer(devtwo, shareDev);               // Developer two receives 3% shares of the Company
+    token.transfer(devtree, shareDev);              // Developer three receives 3% shares of the Company
+    token.transfer(advisor, shareAdvisor);          // Advisor three receives 8% shares of the Company
+    token.transfer(beneficiary, shareBeneficiary);  //Beneficiary receives 51% sharesof the Company
+  }
+}

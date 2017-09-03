@@ -3,5 +3,5 @@ var HoldmeTokenSale = artifacts.require("./HoldmeTokenSale.sol");
 
 module.exports = function(deployer) {
   deployer.deploy(Holdme);
-  //deployer.deploy(HoldmeTokenSale, Holdme.address);
+  //deployer.deploy(HoldmeTokenSale,Holdme.address);
 };
