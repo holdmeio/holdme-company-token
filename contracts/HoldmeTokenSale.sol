@@ -11,10 +11,11 @@ pragma solidity ^0.4.15;
  */
 
 import '../installed_contracts/ERC23/contracts/ClientStandard23Token.sol/';
+import '../installed_contracts/ERC23/contracts/Utils.sol/';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
 
-contract HoldmeTokenSale is Ownable {
+contract HoldmeTokenSale is Ownable, Utils {
   using SafeMath for uint256;
 
   uint256 public constant DURATION_PRELAUNCH = 14 days; // Pre-Launch crowdsale duration
@@ -57,7 +58,7 @@ contract HoldmeTokenSale is Ownable {
   event Finalized();
 
   function HoldmeTokenSale (
-    uint256 _startTimePreLaunch,
+    //uint256 _startTimePreLaunch,
     uint256 _startTime, 
     address _beneficiary, 
     address _devone, 
@@ -65,11 +66,11 @@ contract HoldmeTokenSale is Ownable {
     address _devthree, 
     address _advisor,
     uint256 _shareDev,
-    uint256 _shareAdvisor,
-    uint256 _shareBeneficiary
+    uint256 _shareAdvisor
+    //uint256 _shareBeneficiary
   ) { 
-    startTimePreLaunch = _startTimePreLaunch;
-    endTimePreLaunch = endTimePreLaunch + DURATION_PRELAUNCH;
+    //startTimePreLaunch = _startTimePreLaunch;
+    //endTimePreLaunch = endTimePreLaunch + DURATION_PRELAUNCH;
     startTime = _startTime;
     endTime = startTime + DURATION;
     beneficiary = _beneficiary;
@@ -79,9 +80,15 @@ contract HoldmeTokenSale is Ownable {
     advisor = _advisor;
     shareDev = _shareDev;
     shareAdvisor = _shareAdvisor;
-    shareBeneficiary = _shareBeneficiary;
-    token = ClientStandard23Token(msg.sender);
-    //sendShares();
+    //shareBeneficiary = _shareBeneficiary;
+    sendShares();
+  }
+
+  function setToken(address _token) 
+    validAddress(_token)
+    onlyOwner
+  {
+    token = ClientStandard23Token(_token);
   }
 
   // ensures that we didn't reach the token max cap
@@ -126,12 +133,12 @@ contract HoldmeTokenSale is Ownable {
     Sending Company shares for the Team
     Only executed in constructor
   */
-  function sendShares() private {
+  function sendShares() private onlyOwner{
     token.transfer(devone, shareDev);               // Developer one receives 3% shares of the Company
     token.transfer(devtwo, shareDev);               // Developer two receives 3% shares of the Company
     token.transfer(devtree, shareDev);              // Developer three receives 3% shares of the Company
     token.transfer(advisor, shareAdvisor);          // Advisor three receives 8% shares of the Company
-    token.transfer(beneficiary, shareBeneficiary);  //Beneficiary receives 51% sharesof the Company
+    //token.transfer(beneficiary, shareBeneficiary);  //Beneficiary receives 51% sharesof the Company
   }
 
   /**
