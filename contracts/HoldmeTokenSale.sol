@@ -81,7 +81,7 @@ contract HoldmeTokenSale is Ownable {
     shareAdvisor = _shareAdvisor;
     shareBeneficiary = _shareBeneficiary;
     token = Holdme(msg.sender);
-    sendShares();
+    //sendShares();
   }
 
   // ensures that we didn't reach the token max cap
