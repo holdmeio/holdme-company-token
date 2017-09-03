@@ -10,7 +10,7 @@ pragma solidity ^0.4.15;
  *
  */
 
-import './Holdme.sol';
+import '../installed_contracts/ERC23/contracts/ClientStandard23Token.sol/';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
 
@@ -23,7 +23,7 @@ contract HoldmeTokenSale is Ownable {
   uint256 public constant TOKEN_PRICE_D = 100;          // initial price in wei (denominator)
   uint256 public constant MAX_GAS_PRICE = 50000000000 wei;    // maximum gas price for contribution transactions
 
-  Holdme public token;                                  // The token
+  ClientStandard23Token public token;                                  // The token
 
   string public version = '0.1';
 
@@ -80,7 +80,7 @@ contract HoldmeTokenSale is Ownable {
     shareDev = _shareDev;
     shareAdvisor = _shareAdvisor;
     shareBeneficiary = _shareBeneficiary;
-    token = Holdme(msg.sender);
+    token = ClientStandard23Token(msg.sender);
     //sendShares();
   }
 
