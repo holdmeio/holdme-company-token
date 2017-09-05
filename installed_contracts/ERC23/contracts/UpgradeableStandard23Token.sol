@@ -2,7 +2,7 @@ pragma solidity ^0.4.15;
 
 
  /**
- * @title Client Token used to create a new Token base on Standard23Token for our Client 
+ * @title UpgradeableToken
  *
  * Created by IaM <DEV> (Elky Bachtiar) 
  * https://www.iamdeveloper.io
@@ -13,7 +13,7 @@ import './Standard23Token.sol';
 import '../installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
 
-contract ClientStandard23Token is Ownable, Standard23Token {
+contract UpgradeableStandard23Token is Ownable, Standard23Token {
 	using SafeMath for uint256;
 
     bytes32 public name;
@@ -23,7 +23,7 @@ contract ClientStandard23Token is Ownable, Standard23Token {
     address public owner;
 
 
-    function ClientStandard23Token(address _centralAdmin, uint256 _initialBalance, bytes32 _name, bytes32 _symbol, uint256 _decimals) {
+    function UpgradeableStandard23Token(address _centralAdmin, uint256 _initialBalance, bytes32 _name, bytes32 _symbol, uint256 _decimals) {
         if (_centralAdmin != 0) {
           owner = _centralAdmin;
         } else {
@@ -36,7 +36,7 @@ contract ClientStandard23Token is Ownable, Standard23Token {
         totalSupply = _initialBalance;
     }
 
-    function setName(bytes32 _name) onlyOwner{
+    function setName(bytes32 _name) onlyOwner {
         name = _name;
     }
 
@@ -49,11 +49,15 @@ contract ClientStandard23Token is Ownable, Standard23Token {
     }
 
     function addSupply(uint256 _amount) onlyOwner {
+        require( _amount > 0 && balances[owner].add(_amount) > balances[owner]);
+
     	balances[owner] = balances[owner].add(_amount);
     	totalSupply = totalSupply.add(_amount);
     }
 
     function subSupply(uint256 _amount) onlyOwner {
+        require( _amount > 0 && balances[owner].add(_amount) > balances[owner]);
+        
     	balances[owner] = balances[owner].sub(_amount);
     	totalSupply = totalSupply.sub(_amount);
     }
