@@ -14,6 +14,8 @@ import '../installed_contracts/ERC23/contracts/UpgradeableStandard23Token.sol/';
 import '../installed_contracts/ERC23/contracts/Utils.sol/';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
+import './TokenVault.sol';
+import './PricingScheme.sol';
 
 contract HoldmeTokenSale is Ownable, Utils {
     using SafeMath for uint256;
@@ -24,9 +26,11 @@ contract HoldmeTokenSale is Ownable, Utils {
     uint256 public constant TOKEN_PRICE_D = 100;          // initial price in wei (denominator)
     uint256 public constant MAX_GAS_PRICE = 50000000000 wei;    // maximum gas price for contribution transactions
 
-    UpgradeableStandard23Token public token;                                  // The token
+    UpgradeableStandard23Token public token;        // The token
+    TokenVault public tokenVault;                   // Token Vault where addresses are stored before tokens are released
+    PricingScheme public pricingScheme;
 
-    string public version = '0.1';
+    string public version = "0.1";
 
     uint256 public startTimePreLaunch = 0;          // Pre-Launch crowdsale start time (in seconds)
     uint256 public endTimePreLaunch = 0;            // Pre-Launch crowdsale end time (in seconds)
@@ -67,7 +71,7 @@ contract HoldmeTokenSale is Ownable, Utils {
         address _advisor,
         uint256 _shareDev,
         uint256 _shareAdvisor
-    ){ 
+    ) { 
         //startTimePreLaunch = _startTimePreLaunch;
         //endTimePreLaunch = endTimePreLaunch + DURATION_PRELAUNCH;
         //startTime = _startTime;
@@ -85,6 +89,14 @@ contract HoldmeTokenSale is Ownable, Utils {
 
     function setToken(address _token) validAddress(_token) onlyOwner {
         token = UpgradeableStandard23Token(_token);
+    }
+
+    function setTokenVault(address _tokenVault) validAddress(_tokenVault) onlyOwner {
+        tokenVault = TokenVault(_tokenVault);
+    }
+
+    function setPricingScheme(address _pricingScheme) validAddress(_pricingScheme) onlyOwner {
+        pricingScheme = PricingScheme(_pricingScheme);
     }
 
     // ensures that we didn't reach the token max cap
@@ -191,7 +203,9 @@ contract HoldmeTokenSale is Ownable, Utils {
     {
         assert(beneficiary.send(msg.value)); // transfer the ether to the beneficiary account
         totalEtherContributed = totalEtherContributed.add(msg.value);// update the total contribution amount
-        token.transfer(_contributer, _tokenAmount); // issue new funds to the contributor in the smart token
+
+        tokenVault.setInvestor(_contributer, _tokenAmount);
+        //token.transfer(_contributer, _tokenAmount); // issue new funds to the contributor in the smart token
         totalTokenIssued = totalTokenIssued.add(_tokenAmount);
 
         Contribution(msg.sender, msg.value, _tokenAmount);
