@@ -307,4 +307,29 @@ contract('Holdme', function(accounts) {
 	    assert.fail('should have thrown before');
   	});
 
+  	describe('Holdme #10 validating allowance updates to spender', function() {
+    console.log("Holdme #10 BEGIN==========================================================");
+
+    it('Approval should start with zero and should increase by 50 then decrease by 10', async function() {
+      
+      let preApproved;
+  
+      preApproved = await token.allowance(MAIN_ACCOUNT, SPENDER_ACCOUNT);
+      console.log("preApproved = " +preApproved);
+      assert.equal(preApproved, 0);
+
+      await token.increaseApproval(SPENDER_ACCOUNT, 50);
+      console.log("Increse approval to  50");
+      let postIncrease = await token.allowance(MAIN_ACCOUNT, SPENDER_ACCOUNT);
+      console.log("PostIncrese allowance = " +postIncrease);
+      assert.equal(postIncrease,50);
+      
+      await token.decreaseApproval(SPENDER_ACCOUNT, 10);
+      console.log("Increse approval by 10");
+      let postDecrease = await token.allowance(MAIN_ACCOUNT, SPENDER_ACCOUNT);
+      console.log("postDecrease allowance = " +postDecrease);
+      assert.equal(postDecrease,40);
+    })
+  });
+
 });

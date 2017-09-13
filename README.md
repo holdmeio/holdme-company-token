@@ -326,6 +326,28 @@ mainAccountBalanceAfterTransfer  should be equal to 300000000
 ReceivingAccountBalanceAfterTransfer should be equal to 0
 spenderAccountBalanceAfterTransfer should be equal to 0
     ✓ Holdme #9 should throw an error when trying to transfer more than allowed (229ms)
-    
 
+
+```
+
+
+### Holdme #10 Approval should start with zero and should increase by 50 then decrease by 10
+* [X] Pre approved amount should be 0
+* [X] Increse approval with 50
+* [X] Post increse allowance should be 50
+* [X] Increse approval by 10
+* [X] Post Decrease allowance should be 40
+
+**Console Output:**
+```
+
+Holdme #10 validating allowance updates to spender
+tokenAddress =  0x6db318ba4a2691a89623fdb37bff07ffd7e3d4fb
+preApproved = 0
+Increse approval to  50
+PostIncrese allowance = 50
+Increse approval by 10
+postDecrease allowance = 40
+      ✓ Approval should start with zero and should increase by 50 then decrease by 10 (159ms)
+      
 ```
