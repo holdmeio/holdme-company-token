@@ -300,3 +300,32 @@ spenderAccountBalanceAfterTransfer = 0
 
 
 ```
+
+
+### Holdme #9 should throw an error when trying to transfer more than allowed
+* [X] Bob (main account) has 300000000 tokens (INITIAL_AMOUNT)
+* [X] Alice (spender) have 0 tokens
+* [X] Chris (receiver) have 0 tokens
+* [X] Bob gives approval to Alice to be able to transferFrom 99
+* [X] Alice transfer 10000 tokens to Chris
+* [X] Throw an error when trying to transferFrom more than allowed
+* [X] Bob still have 99 tokens left
+* [X] Chris will have 0 tokens left
+* [X] Alice still have 0 tokens
+
+**Console Output:**
+```
+
+Holdme #9 BEGIN==========================================================
+mainAccountBalanceBeforeTransfer should be equal to 300000000
+ReceivingAccountBalanceBeforeTransfer should be equal to 0
+spenderAccountBalanceBeforeTransfer should be equal to 0
+APPROVE_AMOUNT 99
+Try to TransferFrom 10000 MAIN_ACCOUNT to RECEIVING_ACCOUNT from SPENDER_ACCOUNT
+mainAccountBalanceAfterTransfer  should be equal to 300000000
+ReceivingAccountBalanceAfterTransfer should be equal to 0
+spenderAccountBalanceAfterTransfer should be equal to 0
+    ✓ Holdme #9 should throw an error when trying to transfer more than allowed (229ms)
+    
+
+```

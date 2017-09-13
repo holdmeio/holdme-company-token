@@ -267,4 +267,44 @@ contract('Holdme', function(accounts) {
     
   	});
 
+  	it('Holdme #9 should throw an error when trying to transfer more than allowed', async function() {
+	    console.log("Holdme #9 BEGIN==========================================================");
+
+	    const APPROVE_AMOUNT = 99;
+	    
+	    let mainAccountBalanceBeforeTransfer = await token.balanceOf(MAIN_ACCOUNT);
+	    console.log("mainAccountBalanceBeforeTransfer should be equal to " +mainAccountBalanceBeforeTransfer);
+	    assert.equal(mainAccountBalanceBeforeTransfer, INITAL_SUPPLY);
+
+	    let ReceivingAccountBalanceBeforeTransfer = await token.balanceOf(RECEIVING_ACCOUNT);
+	    console.log("ReceivingAccountBalanceBeforeTransfer should be equal to " +ReceivingAccountBalanceBeforeTransfer);
+	    assert.equal(ReceivingAccountBalanceBeforeTransfer, 0);
+
+	    let spenderAccountBalanceBeforeTransfer = await token.balanceOf(SPENDER_ACCOUNT);
+	    console.log("spenderAccountBalanceBeforeTransfer should be equal to " +spenderAccountBalanceBeforeTransfer);
+	    assert.equal(spenderAccountBalanceBeforeTransfer, 0);
+
+	    await token.approve(SPENDER_ACCOUNT, APPROVE_AMOUNT);
+	    console.log("APPROVE_AMOUNT " +APPROVE_AMOUNT);
+	    try {
+	      console.log("Try to TransferFrom " +TRANSFER_AMOUNT +" MAIN_ACCOUNT to RECEIVING_ACCOUNT from SPENDER_ACCOUNT");
+	      await token.transferFrom(MAIN_ACCOUNT, RECEIVING_ACCOUNT, TRANSFER_AMOUNT, {from: SPENDER_ACCOUNT});
+	    } catch(error) {
+	      let mainAccountBalanceAfterTransfer = await token.balanceOf(MAIN_ACCOUNT);
+	      console.log("mainAccountBalanceAfterTransfer  should be equal to " +mainAccountBalanceAfterTransfer);
+	      assert.equal(mainAccountBalanceAfterTransfer, INITAL_SUPPLY);
+
+	      let ReceivingAccountBalanceAfterTransfer = await token.balanceOf(RECEIVING_ACCOUNT);
+	      console.log("ReceivingAccountBalanceAfterTransfer should be equal to " +ReceivingAccountBalanceAfterTransfer);
+	      assert.equal(ReceivingAccountBalanceAfterTransfer, 0);
+
+	      let spenderAccountBalanceAfterTransfer = await token.balanceOf(SPENDER_ACCOUNT);
+	      console.log("spenderAccountBalanceAfterTransfer should be equal to " +spenderAccountBalanceAfterTransfer);
+	      assert.equal(spenderAccountBalanceAfterTransfer, 0);
+
+	      return assertJump(error);
+	    }
+	    assert.fail('should have thrown before');
+  	});
+
 });
