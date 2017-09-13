@@ -10,7 +10,7 @@ pragma solidity ^0.4.15;
  *
  */
 
-import '../installed_contracts/ERC23/contracts/UpgradeableStandard23Token.sol/';
+import './Holdme.sol/';
 import '../installed_contracts/ERC23/contracts/Utils.sol/';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
@@ -26,7 +26,7 @@ contract HoldmeTokenSale is Ownable, Utils {
     uint256 public constant TOKEN_PRICE_D = 100;          // initial price in wei (denominator)
     uint256 public constant MAX_GAS_PRICE = 50000000000 wei;    // maximum gas price for contribution transactions
 
-    UpgradeableStandard23Token public token;        // The token
+    Holdme public token;        // The token
     TokenVault public tokenVault;                   // Token Vault where addresses are stored before tokens are released
     PricingScheme public pricingScheme;
 
@@ -56,12 +56,15 @@ contract HoldmeTokenSale is Ownable, Utils {
 
     bool public isFinalized = false;
 
+    address public owner;
+
 
     // triggered on each contribution
     event Contribution(address indexed _contributor, uint256 _amount, uint256 _return);
     event Finalized();
 
     function HoldmeTokenSale (
+        address _centralAdmin,
         //uint256 _startTimePreLaunch,
         //uint256 _startTime, 
         address _beneficiary, 
@@ -72,6 +75,12 @@ contract HoldmeTokenSale is Ownable, Utils {
         uint256 _shareDev,
         uint256 _shareAdvisor
     ) { 
+
+        if (_centralAdmin != 0) {
+          owner = _centralAdmin;
+        } else {
+          owner = msg.sender;
+        }
         //startTimePreLaunch = _startTimePreLaunch;
         //endTimePreLaunch = endTimePreLaunch + DURATION_PRELAUNCH;
         //startTime = _startTime;
@@ -88,7 +97,7 @@ contract HoldmeTokenSale is Ownable, Utils {
     }
 
     function setToken(address _token) validAddress(_token) onlyOwner {
-        token = UpgradeableStandard23Token(_token);
+        token = Holdme(_token);
     }
 
     function setTokenVault(address _tokenVault) validAddress(_tokenVault) onlyOwner {

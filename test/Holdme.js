@@ -52,7 +52,7 @@ contract('Holdme', function(accounts) {
     	let mainAccountBalance = await token.balanceOf(MAIN_ACCOUNT);
     	console.log("The balance of the MAIN_ACCOUNT  should be " +INITAL_SUPPLY);
     	assert.equal(mainAccountBalance, INITAL_SUPPLY);
-	})
+	});
 
 	it("Holdme #2 should return correct balances after transfer", async function(){
 		console.log("Holdme #2. BEGIN==========================================================");
