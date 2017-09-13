@@ -42,6 +42,7 @@ contract HoldmeTokenSale is Ownable, Utils {
     uint256 public totalBtcContributed = 0;         // bitcoin contributed so far
     bytes32 public realEtherCapHash;                // ensures that the real cap is predefined on deployment and cannot be changed later
     address public beneficiary = 0x0;               // address to receive all ether contributions
+    address public devteam = 0x0;
     address public btcs = 0x0;                      // bitcoin suisse address
     bool    public preLaunch = false;               // Set pre-launch to true or false
 
@@ -62,8 +63,8 @@ contract HoldmeTokenSale is Ownable, Utils {
     event Finalized();
 
     function HoldmeTokenSale (
-        //uint256 _startTimePreLaunch,
-        //uint256 _startTime, 
+        uint256 _startTimePreLaunch,
+        uint256 _startTime, 
         address _beneficiary, 
         address _devone, 
         address _devtwo, 
@@ -72,10 +73,10 @@ contract HoldmeTokenSale is Ownable, Utils {
         uint256 _shareDev,
         uint256 _shareAdvisor
     ) { 
-        //startTimePreLaunch = _startTimePreLaunch;
-        //endTimePreLaunch = endTimePreLaunch + DURATION_PRELAUNCH;
-        //startTime = _startTime;
-        //endTime = startTime + DURATION;
+        startTimePreLaunch = _startTimePreLaunch;
+        endTimePreLaunch = endTimePreLaunch + DURATION_PRELAUNCH;
+        startTime = _startTime;
+        endTime = startTime + DURATION;
         beneficiary = _beneficiary;
         devone = _devone;
         devtwo = _devtwo;
