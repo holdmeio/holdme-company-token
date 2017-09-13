@@ -43,7 +43,7 @@ contract PricingScheme is Ownable {
   function PricingScheme(uint[] _milestones) {
     // Need to have tuples, length check
     if(_milestones.length % 2 == 1 || _milestones.length >= MAX_MILESTONE*2) {
-      throw;
+      //throw;
     }
 
     milestoneCount = _milestones.length / 2;
@@ -56,7 +56,7 @@ contract PricingScheme is Ownable {
 
       // No invalid steps
       if((lastTimestamp != 0) && (milestones[i].time <= lastTimestamp)) {
-        throw;
+        //throw;
       }
 
       lastTimestamp = milestones[i].time;
@@ -64,7 +64,7 @@ contract PricingScheme is Ownable {
 
     // Last milestone price must be zero, terminating the crowdale
     if(milestones[milestoneCount-1].price != 0) {
-      throw;
+      //throw;
     }
   }
 
@@ -118,7 +118,7 @@ contract PricingScheme is Ownable {
   }
 
   function() payable {
-    throw; // No money on this contract
+    //throw; // No money on this contract
   }
 
 }

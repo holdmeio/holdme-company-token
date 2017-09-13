@@ -1,4 +1,4 @@
-var Holdme = artifacts.require("../installed_contracts/ERC23/contracts/UpgradeableStandard23Token.sol");
+var Holdme = artifacts.require("./Holdme.sol");
 var HoldmeTokenSale = artifacts.require('./HoldmeTokenSale');
 
 module.exports = function(deployer) {
