@@ -141,7 +141,7 @@ contract HoldmeTokenSale is Ownable, Utils {
         Sending Company shares for the Team
         Only executed in constructor
     */
-    function sendShares() internal onlyOwner{
+    function sendShares() internal onlyOwner {
         token.transfer(devone, shareDev);               
         token.transfer(devtwo, shareDev);               
         token.transfer(devtree, shareDev);             
@@ -164,7 +164,7 @@ contract HoldmeTokenSale is Ownable, Utils {
         require(_contributer != 0x0);
         require(msg.value!=0);
         //uint256 discount = 0;
-        uint256 tokenAmount = computeReturn(msg.value);
+        uint256 tokenAmount = pricingScheme.calculatePrice(msg.value,1);
         processContribution(_contributer, tokenAmount);
         return tokenAmount;
     }
@@ -185,7 +185,7 @@ contract HoldmeTokenSale is Ownable, Utils {
         require(_contributer != 0x0);
         require(msg.value!=0);
         //uint256 discount = 0;
-        uint256 tokenAmount = computeReturn(msg.value.mul(_btcToEthPrice));
+        uint256 tokenAmount = pricingScheme.calculatePrice(msg.value.mul(_btcToEthPrice),1);
         processContribution(_contributer, tokenAmount);
         return tokenAmount;
     }
