@@ -15,7 +15,12 @@ contract('HoldmeTokenSale', function(accounts) {
  	const TRANSFER_AMOUNT = 10000;
  	const APPROVE_AMOUNT = 1000;
 
- 	const startTime = '';
+ 	let startTimeSale = Math.floor(Date.now() / 1000) + 100 * 24 * 60 * 60; // crowdsale hasn't started
+ 	let endTimeSale = startTimeSale + 60 * 24 * 60 * 60; // startTimeSale+60 days ==> endtime crowdsale hasn't started
+
+ 	let startTimeInProgress = Math.floor(Date.now() / 1000) - 12 * 60 * 60; // ongoing crowdsale
+	let startTimeFinished = startTimeInProgress + 60 * 24 * 60 * 60; // ongoing crowdsale
+
 	const beneficiary = '0x1dABC283dB78A4e94cAce54ed0858f606045962e';
 	const devone = '0xe6EAaC5bc3BEe75D5f06cCa9674407861e5D8743'; //gilang
 	const devtwo = '0xB42b8f0aac75c7231AF3d9403cCFBE667892d2Cf'; //yohanes
@@ -39,7 +44,7 @@ contract('HoldmeTokenSale', function(accounts) {
     	tokenAddress = token.address;
 		console.log("tokenAddress =  " +tokenAddress);
 
-		tokenSale = await HoldmeTokenSale.new(MAIN_ACCOUNT, beneficiary, devone, devtwo, devtree, advisor, shareDev, shareAdvisor);
+		tokenSale = await HoldmeTokenSale.new(MAIN_ACCOUNT, startTimeSale, endTimeSale, beneficiary, devone, devtwo, devtree, advisor, shareDev, shareAdvisor);
 		tokenSaleAddress = tokenSale.address;
 		console.log("tokenSaleAddress =  " +tokenSaleAddress);
 
@@ -69,9 +74,21 @@ contract('HoldmeTokenSale', function(accounts) {
     	console.log("getDevtree = " +getDevtree);
     	assert.equal(getDevtree.toUpperCase(), devtree.toUpperCase());
 
+    	let getShareAdvisor = await tokenSale.shareAdvisor();
+    	console.log("getShareAdvisor = " +getShareAdvisor);
+    	assert.equal(getShareAdvisor, shareAdvisor);
+
     	let getShareDev = await tokenSale.shareDev();
     	console.log("getShareDev = " +getShareDev);
     	assert.equal(getShareDev, shareDev);
+
+    	let getStartTimeSale = await tokenSale.startTime();
+    	console.log("getStartTimeSale not in progress= " +getStartTimeSale);
+    	assert.equal(getStartTimeSale, startTimeSale);
+
+    	let getEndTimeSale = await tokenSale.endTime();
+    	console.log("getEndTimeSale not in progress= " +getEndTimeSale);
+    	assert.equal(getEndTimeSale, endTimeSale);
     	
 	});
 
@@ -100,13 +117,48 @@ contract('HoldmeTokenSale', function(accounts) {
 		console.log("The Token decimals should be equal to " +decimals);
 		assert.equal(decimals, tokenDecimals);
 
-    	console.log("What is the balance of MAIN_ACCOUNT?");
     	let mainAccountBalance = await token.balanceOf(MAIN_ACCOUNT);
-    	console.log("The balance of the MAIN_ACCOUNT  should be " +INITAL_SUPPLY);
+    	console.log("The token balance of the MAIN_ACCOUNT  should be " +INITAL_SUPPLY);
     	assert.equal(mainAccountBalance, INITAL_SUPPLY);
+
+    	let beneficiaryBalance = await token.balanceOf(beneficiary);
+    	console.log("The token balance of the beneficiary  should be equal to " +beneficiaryBalance);
+    	assert.equal(beneficiaryBalance, 0);
+
+    	let advisorBalance = await token.balanceOf(advisor);
+    	console.log("The token balance of the advisor  should be equal to " +advisorBalance);
+    	assert.equal(advisorBalance, 0);
+
+    	let devoneBalance = await token.balanceOf(devone);
+    	console.log("The token balance of the devone  should be equal to " +devoneBalance);
+    	assert.equal(devoneBalance, 0);
+
+    	let devtwoBalance = await token.balanceOf(devtwo);
+    	console.log("The token balance of the devtwo  should be equal to " +devtwoBalance);
+    	assert.equal(devtwoBalance, 0);
+
+    	let devtreeBalance = await token.balanceOf(devtree);
+    	console.log("The token balance of the devtree  should be equal to " +devtreeBalance);
+    	assert.equal(devtreeBalance, 0);
     	
 	});
 
+
+	it("HoldmeTokenSale #3 should start the token sale", async function() {
+ 		console.log("HoldmeTokenSale #3. BEGIN==========================================================");
+
+ 		let start = await tokenSale.setStartTime(startTimeInProgress);
+    	let end = await tokenSale.setEndTime(startTimeFinished);
+
+ 		let getStartTimeSale = await tokenSale.startTime();
+    	console.log("getStartTimeSale in progress= " +getStartTimeSale);
+    	assert.equal(getStartTimeSale, startTimeInProgress);
+
+    	let getEndTimeSale = await tokenSale.endTime();
+    	console.log("getEndTimeSale  in progress= " +getEndTimeSale);
+    	assert.equal(getEndTimeSale, startTimeFinished);
+
+	});
 
 
 });	

@@ -351,3 +351,79 @@ postDecrease allowance = 40
       ✓ Approval should start with zero and should increase by 50 then decrease by 10 (159ms)
       
 ```
+
+
+## Unit testing scenario's HoldmeTokenSale.sol
+
+###  HoldmeTokenSale #1 should return the correct information after construction
+* [X] Beneficiary should be equal to 0x1dabc283db78a4e94cace54ed0858f606045962e
+* [X] Advisor should be equal to 0xe377c8b3b3a5427e5e9aba8c46bcd3f506ed9d38
+* [X] Devone address should be equal to 0xe6eaac5bc3bee75d5f06cca9674407861e5d8743
+* [X] Devtwo address should be equal to 0xb42b8f0aac75c7231af3d9403ccfbe667892d2cf
+* [X] Devthree address should be equal to 0x2d0156a30af6856cb7d3cf5bb10061e780589751
+* [X] Company Share of Advisor should be equal to 24000000
+* [X] StartTimeSale not in progress should be equal to 100 days from now
+* [X] getEndTimeSale not in progress should be equal StartTimeSale + 60 days
+
+**Console Output:**
+```
+
+HoldmeTokenSale #1. BEGIN==========================================================
+getBeneficiary = 0x1dabc283db78a4e94cace54ed0858f606045962e
+getAdvisor = 0xe377c8b3b3a5427e5e9aba8c46bcd3f506ed9d38
+getDevone = 0xe6eaac5bc3bee75d5f06cca9674407861e5d8743
+getDevtwo = 0xb42b8f0aac75c7231af3d9403ccfbe667892d2cf
+getDevtree = 0x2d0156a30af6856cb7d3cf5bb10061e780589751
+getShareAdvisor = 2.4e+25
+getShareDev = 9e+24
+getStartTimeSale not in progress= 1513949823
+getEndTimeSale not in progress= 1519133823
+    ✓ HoldmeTokenSale #1 should return the correct information after construction (246ms)
+
+```
+
+
+###  HoldmeTokenSale and HoldmeToken #2 should return the correct information after setToken
+* [X] totalSupply should be equal to 300000000
+* [X] name should be equal to "Holdme company token"
+* [X] symbol should be should be equal to "HME"
+* [X] decimals should be should be equal to 18
+* [X] Owner (MAIN_ACCOUNT) should owned all the tokens and this should be equal to 300000000 * Math.pow(10,18)
+* [X] The Token balance of beneficiary should be 0
+* [X] The Token balance of advisor should be 0
+* [X] The Token balance of devone should be 0
+* [X] The Token balance of devtwo should be 0
+* [X] The Token balance of devtree should be 0
+
+
+**Console Output:**
+```
+
+HoldmeTokenSale #2. BEGIN==========================================================
+The totalSupply of the created Token should equal to 300000000
+The Token name should be equal to Holdme company token
+The Token symbol should be equal to HME
+The Token decimals should be equal to 0
+The token balance of the MAIN_ACCOUNT  should be 300000000
+The token balance of the beneficiary  should be equal to 0
+The token balance of the advisor  should be equal to 0
+The token balance of the devone  should be equal to 0
+The token balance of the devtwo  should be equal to 0
+The token balance of the devtree  should be equal to 0
+    ✓ HoldmeTokenSale #2 should return the correct information after setToken (303ms)
+
+
+```
+### HoldmeTokenSale #3 should start the token sale
+* [X] StartTimeSale in progress should be equal to today
+* [X] getEndTimeSale in progress should be equal today + 60
+
+**Console Output:**
+```
+
+HoldmeTokenSale #3. BEGIN==========================================================
+getStartTimeSale in progress= 1505266917
+getEndTimeSale  in progress= 1510450917
+    ✓ HoldmeTokenSale #3 should start the token sale (109ms)
+
+```

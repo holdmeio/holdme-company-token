@@ -20,8 +20,6 @@ import './PricingScheme.sol';
 contract HoldmeTokenSale is Ownable, Utils {
     using SafeMath for uint256;
 
-    uint256 public constant DURATION_PRELAUNCH = 14 days; // Pre-Launch crowdsale duration
-    uint256 public constant DURATION = 60 days;           // crowdsale duration
     uint256 public constant TOKEN_PRICE_N = 1;            // initial price in wei (numerator)
     uint256 public constant TOKEN_PRICE_D = 100;          // initial price in wei (denominator)
     uint256 public constant MAX_GAS_PRICE = 50000000000 wei;    // maximum gas price for contribution transactions
@@ -65,8 +63,8 @@ contract HoldmeTokenSale is Ownable, Utils {
 
     function HoldmeTokenSale (
         address _centralAdmin,
-        //uint256 _startTimePreLaunch,
-        //uint256 _startTime, 
+        uint256 _startTime, 
+        uint256 _endTime, 
         address _beneficiary, 
         address _devone, 
         address _devtwo, 
@@ -81,10 +79,8 @@ contract HoldmeTokenSale is Ownable, Utils {
         } else {
           owner = msg.sender;
         }
-        //startTimePreLaunch = _startTimePreLaunch;
-        //endTimePreLaunch = endTimePreLaunch + DURATION_PRELAUNCH;
-        //startTime = _startTime;
-        //endTime = startTime + DURATION;
+        startTime = _startTime;
+        endTime = _endTime;
         beneficiary = _beneficiary;
         devone = _devone;
         devtwo = _devtwo;
@@ -92,12 +88,21 @@ contract HoldmeTokenSale is Ownable, Utils {
         advisor = _advisor;
         shareDev = _shareDev;
         shareAdvisor = _shareAdvisor;
-        //shareBeneficiary = _shareBeneficiary;
-        //sendShares();
     }
 
-    function setToken(address _token) validAddress(_token) onlyOwner {
+    function setToken(address _token) validAddress(_token) onlyOwner returns (bool success) {
         token = Holdme(_token);
+        return true;
+    }
+
+    function setStartTime(uint256 _newStartTime) onlyOwner returns (bool success) {
+        startTime = _newStartTime;
+        return true;
+    }
+
+    function setEndTime(uint256 _newEndTime) onlyOwner returns (bool success) {
+        endTime = _newEndTime;
+        return true;
     }
 
     function setTokenVault(address _tokenVault) validAddress(_tokenVault) onlyOwner {
