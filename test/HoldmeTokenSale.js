@@ -1,7 +1,7 @@
 'use strict';
 
 
-const assertJump = require('./helpers/assertJump');
+const assertJump = require('../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/test/helpers/assertJump');
 var Holdme = artifacts.require('../contracts/Holdme.sol');
 var HoldmeTokenSale = artifacts.require('../contracts/HoldmeTokenSale.sol');
 

@@ -112,51 +112,6 @@ contract HoldmeTokenSale is Ownable, Utils {
         _;
     }
 
-
-    function setToken(address _token) validAddress(_token) onlyOwner public returns (bool success) {
-        token = Holdme(_token);
-        return true;
-    }
-
-    function setStartTime(uint256 _newStartTime) onlyOwner public returns (bool success) {
-        startTime = _newStartTime;
-        return true;
-    }
-
-    function setEndTime(uint256 _newEndTime) onlyOwner public returns (bool success) {
-        endTime = _newEndTime;
-        return true;
-    }
-
-    // @notice Function to stop sale for an emergency.
-    // @dev Only Holdme Dev can do it after it has been activated.
-    function emergencyStopSale()
-        only_sale_not_stopped
-        onlyOwner
-        public 
-    {
-        saleStopped = true;
-    }
-
-    // @notice Function to restart stopped sale.
-    // @dev Only Holdme Dev can do it after it has been disabled and sale is ongoing.
-    function restartSale()
-        between
-        only_sale_stopped
-        onlyOwner
-        public 
-    {
-        saleStopped = false;
-    }
-
-    function setTokenVault(address _tokenVault) validAddress(_tokenVault) onlyOwner {
-        tokenVault = TokenVault(_tokenVault);
-    }
-
-    function setPricingScheme(address _pricingScheme) validAddress(_pricingScheme) onlyOwner {
-        pricingScheme = PricingScheme(_pricingScheme);
-    }
-
     // ensures that we didn't reach the token max cap
     modifier tokenMaxCapNotReached() {
         assert(totalTokenIssued <= totalTokenCap);
@@ -167,6 +122,73 @@ contract HoldmeTokenSale is Ownable, Utils {
     modifier validGasPrice() {
         assert(tx.gasprice <= MAX_GAS_PRICE);
         _;
+    }
+
+
+    function setToken(address _token) 
+        public 
+        validAddress(_token)
+        onlyOwner
+        returns (bool success)
+    {
+        token = Holdme(_token);
+        return true;
+    }
+
+    function setStartTime(uint256 _newStartTime) 
+        public 
+        onlyOwner 
+        returns (bool success) 
+    {
+        startTime = _newStartTime;
+        return true;
+    }
+
+    function setEndTime(uint256 _newEndTime) 
+        public 
+        onlyOwner
+        returns (bool success) 
+    {
+        endTime = _newEndTime;
+        return true;
+    }
+
+    // @notice Function to stop sale for an emergency.
+    // @dev Only Holdme Dev can do it after it has been activated.
+    function emergencyStopSale()
+        public
+        only_sale_not_stopped
+        onlyOwner
+    {
+        saleStopped = true;
+    }
+
+    // @notice Function to restart stopped sale.
+    // @dev Only Holdme Dev can do it after it has been disabled and sale is ongoing.
+    function restartSale()
+        public
+        between
+        only_sale_stopped
+        onlyOwner 
+    {
+        saleStopped = false;
+    }
+
+
+    function setTokenVault(address _tokenVault) 
+        public
+        validAddress(_tokenVault)
+        onlyOwner
+    {
+        tokenVault = TokenVault(_tokenVault);
+    }
+
+    function setPricingScheme(address _pricingScheme) 
+        public
+        validAddress(_pricingScheme) 
+        onlyOwner
+    {
+        pricingScheme = PricingScheme(_pricingScheme);
     }
 
 
@@ -181,24 +203,7 @@ contract HoldmeTokenSale is Ownable, Utils {
         return (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N);
     }
 
-    function percent(uint256 numerator, uint256 denominator, uint256 precision) private constant returns(uint quotient) {
-        // caution, check safe-to-multiply here
-        uint256 _numerator  = numerator * 10 ** (precision.add(1));
-        // with rounding of last digit
-        uint256 _quotient =  ((_numerator / denominator) + 5).div(10);
-        return ( _quotient);
-    }
-
-    /**
-        Sending Company shares for the Team
-        Only executed in constructor
-    */
-    function sendShares() internal onlyOwner{
-        token.transfer(devone, shareDev);               
-        token.transfer(devtwo, shareDev);               
-        token.transfer(devtree, shareDev);             
-        token.transfer(advisor, shareAdvisor);        
-    }
+  
 
     /**
         @dev ETH contribution
@@ -209,15 +214,15 @@ contract HoldmeTokenSale is Ownable, Utils {
     function contributeETH(address _contributer, uint256 _amount)
         public
         payable
-        //between
+        between
         tokenMaxCapNotReached
         returns (uint256 amount)
     {
-        require(_contributer != 0x0);
-        require(msg.value!=0);
-        //uint256 discount = 0;
+        require(_contributer != 0x0 &&
+                _amount > 0);
+
         uint256 tokenAmount = computeReturn(_amount);
-        processContribution(_contributer, tokenAmount);
+        processContribution(_contributer, _amount, tokenAmount);
         return tokenAmount;
     }
 
@@ -227,18 +232,18 @@ contract HoldmeTokenSale is Ownable, Utils {
 
         @return tokens issued in return
     */
-    function contributeBTC(address _contributer, uint256 _btcToEthPrice)
+    function contributeBTC(address _contributer, uint256 _amount, uint256 _btcToEthPrice)
         public
         payable
         onlyOwner
         tokenMaxCapNotReached
         returns (uint256 amount)
     {
-        require(_contributer != 0x0);
-        require(msg.value!=0);
-        //uint256 discount = 0;
-        uint256 tokenAmount = computeReturn(msg.value.mul(_btcToEthPrice));
-        processContribution(_contributer, tokenAmount);
+        require(_contributer != 0x0 &&
+                _amount > 0);
+
+        uint256 tokenAmount = computeReturn(_amount.mul(_btcToEthPrice));
+        processContribution(_contributer, _amount, tokenAmount);
         return tokenAmount;
     }
 
@@ -248,19 +253,19 @@ contract HoldmeTokenSale is Ownable, Utils {
 
         @return tokens issued in return
     */
-    function processContribution(address _contributer, uint256 _tokenAmount) private
+    function processContribution(address _contributer, uint256 _ethAmount, uint256 _tokenAmount) 
+        private
         onlyOwner
         tokenMaxCapNotReached()
         validGasPrice
     {
-        assert(beneficiary.send(msg.value)); // transfer the ether to the beneficiary account
-        totalEtherContributed = totalEtherContributed.add(msg.value);// update the total contribution amount
+        assert(beneficiary.send(_ethAmount)); // transfer the ether to the beneficiary account
+        totalEtherContributed = totalEtherContributed.add(_ethAmount);// update the total contribution amount
 
         tokenVault.setInvestor(_contributer, _tokenAmount);
-        //token.transfer(_contributer, _tokenAmount); // issue new funds to the contributor in the smart token
         totalTokenIssued = totalTokenIssued.add(_tokenAmount);
 
-        Contribution(msg.sender, msg.value, _tokenAmount);
+        Contribution(_contributer, _ethAmount, _tokenAmount);
     }
 
   
@@ -290,5 +295,16 @@ contract HoldmeTokenSale is Ownable, Utils {
     */
     function finalization() internal {
         sendShares();
+    }
+
+    /**
+        Sending Company shares for the Team
+        Only executed in constructor
+    */
+    function sendShares() internal onlyOwner{
+        token.transfer(devone, shareDev);               
+        token.transfer(devtwo, shareDev);               
+        token.transfer(devtree, shareDev);             
+        token.transfer(advisor, shareAdvisor);        
     }
 }
