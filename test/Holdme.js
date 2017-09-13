@@ -199,4 +199,34 @@ contract('Holdme', function(accounts) {
 	    }
 	});
 
+   	it('Holdme #7 should return the correct allowance amount after approval', async function() {
+	    console.log("Holdme #2 BEGIN==========================================================");
+	    console.log("SPENDER_ACCOUNT allowed to transfer " +APPROVE_AMOUNT +" because SPENDER_ACCOUNT has " +APPROVE_AMOUNT +" approved amount");
+
+
+	    let mainAccountBalanceBeforeTransfer = await token.balanceOf(MAIN_ACCOUNT);
+	    console.log("mainAccountBalanceBeforeTransfer should be equal to " +mainAccountBalanceBeforeTransfer);
+	    assert.equal(mainAccountBalanceBeforeTransfer, INITAL_SUPPLY);
+
+	    let spenderAccountBalanceBeforeTransfer = await token.balanceOf(SPENDER_ACCOUNT);
+	    console.log("spenderAccountBalanceBeforeTransfer should be equal to " +spenderAccountBalanceBeforeTransfer);
+	    assert.equal(spenderAccountBalanceBeforeTransfer, 0);
+
+	    await token.approve(SPENDER_ACCOUNT, APPROVE_AMOUNT);
+	    console.log("APPROVE_AMOUNT = " +APPROVE_AMOUNT);
+
+
+	    let allowance = await token.allowance(MAIN_ACCOUNT, SPENDER_ACCOUNT);
+	    console.log("Allowance = " +allowance +"  of SPENDER_ACCOUNT");
+	    assert.equal(allowance, APPROVE_AMOUNT);
+
+	    let mainAccountBalanceAfterTransfer = await token.balanceOf(MAIN_ACCOUNT);
+	    console.log("mainAccountBalanceAfterTransfer should be equal to " +mainAccountBalanceAfterTransfer);
+	    assert.equal(mainAccountBalanceAfterTransfer, INITAL_SUPPLY);
+
+	    let spenderAccountBalanceAfterTransfer = await token.balanceOf(SPENDER_ACCOUNT);
+	    console.log("spenderAccountBalanceAfterTransfer should be equal to " +spenderAccountBalanceAfterTransfer);
+	    assert.equal(spenderAccountBalanceAfterTransfer, 0);
+  	});
+
 });

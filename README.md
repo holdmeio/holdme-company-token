@@ -246,3 +246,28 @@ mainAccountBalanceAfterTransfer should be equal to 300000000
 
 
 ```
+
+
+### Holdme #7 should return the correct allowance amount after approval
+* [X] Bob (main account) has 300000000 tokens (INITIAL_AMOUNT)
+* [X] Alice (spender) still have 0 tokens
+* [X] Bob gives approval to Alice to be able to  transfer 1000 tokens
+* [X] Allowance of Alice must be tokens
+* [X] Bob still have  300000000 tokens
+* [X] Alice still have 0 tokens
+
+
+**Console Output:**
+```
+
+Holdme #2 BEGIN==========================================================
+SPENDER_ACCOUNT allowed to transfer 1000 because SPENDER_ACCOUNT has 1000 approved amount
+mainAccountBalanceBeforeTransfer should be equal to 300000000
+spenderAccountBalanceBeforeTransfer should be equal to 0
+APPROVE_AMOUNT = 1000
+Allowance = 1000  of SPENDER_ACCOUNT
+mainAccountBalanceAfterTransfer should be equal to 300000000
+spenderAccountBalanceAfterTransfer should be equal to 0
+    ✓ Holdme #7 should return the correct allowance amount after approval (191ms)
+
+```
