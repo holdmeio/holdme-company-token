@@ -8,15 +8,36 @@ Holdme Company Token (HME) is a company share. It means that that the HME is the
 HME is implemented as an Ethereum-based token on the Ethereum blockchain.
 HME complies with the ERC23 standard. ERC23 tokens are backwards compatible with ERC20 tokens. It means that ERC23 supports every ERC20 functional and contracts or services working with ERC20 tokens will work with ERC23 tokens correctly.
 
+## Token Emission
+Tokens emission – 300 000 000 (300 millions)
+Initial price for 1 token = 0.00033 ETH ( ± 1$=10 tokens)
+
+## Company Shares
+Total 2425 ETH funds are expected.
+Total company shares: 300 000 000 HME Shares = 100% of the company shares.
+
+* (21,5%) 63 000 000 HME Shares to be available in Token sale:
+	* (0,5%) 1 500 000 HME Shares Pre-Launch;
+	* Price per token during pre-launch = 0.00022 ETH
+	* (21%) 61 500 000 HME Shares Token Sales;
+* Price per token during pre-launch = 0.00033 ETH
+* (14%) 42 000 000 HME Shares to be reserved for future use.
+* (51%) 152 000 000 HME Shares reserved after the owners.
+* (15%) 4 500 000 HME Shares goes to team.
+
+Tokens will be sold for ETH, BTC, BCH, DASH and LTC.
+
+
+
 
 ## Requirements
 To run tests you need to install the following software:
 
-* [Nodejs v6.11.3 LTS] (https://nodejs.org/)
-* [Truffle v3.4.9] (https://github.com/trufflesuite/truffle)
-* [EthereumJS TestRPC v4.0.1] (https://github.com/ethereumjs/testrpc)
-* [Solidity v0.4.15] (http://solidity.readthedocs.io/en/develop/installing-solidity.html)
-* [Geth] (https://github.com/ethereum/go-ethereum/wiki/geth)
+* [Nodejs v6.11.3 LTS](https://nodejs.org/)
+* [Truffle v3.4.9](https://github.com/trufflesuite/truffle)
+* [EthereumJS TestRPC v4.0.1](https://github.com/ethereumjs/testrpc)
+* [Solidity v0.4.15](http://solidity.readthedocs.io/en/develop/installing-solidity.html)
+* [Geth](https://github.com/ethereum/go-ethereum/wiki/geth)
 
 # Getting Started
 Holdme integrates with Truffle, an Ethereum development environment. 
@@ -67,6 +88,8 @@ truffle test --network development
 truffle migrate --network development
 ```
 
+
+
 # How to test on Ropsten Test Network
 Change the Ethereum Wallet addrress in truffle.js file. Add your  ETH wallet address
 
@@ -81,6 +104,8 @@ cd hme
 truffle compile --all
 truffle migrate --network ropsten
 ```
+
+
 
 # Unit Test
 
