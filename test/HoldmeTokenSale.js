@@ -1,9 +1,9 @@
 'use strict';
 
+
 const assertJump = require('./helpers/assertJump');
 var Holdme = artifacts.require('../contracts/Holdme.sol');
 var HoldmeTokenSale = artifacts.require('../contracts/HoldmeTokenSale.sol');
-
 
 contract('HoldmeTokenSale', function(accounts) {
 
@@ -151,14 +151,46 @@ contract('HoldmeTokenSale', function(accounts) {
     	let end = await tokenSale.setEndTime(startTimeFinished);
 
  		let getStartTimeSale = await tokenSale.startTime();
-    	console.log("getStartTimeSale in progress= " +getStartTimeSale);
+    	console.log("getStartTimeSale in progress = " +getStartTimeSale);
     	assert.equal(getStartTimeSale, startTimeInProgress);
 
     	let getEndTimeSale = await tokenSale.endTime();
-    	console.log("getEndTimeSale  in progress= " +getEndTimeSale);
+    	console.log("getEndTimeSale  in progress = " +getEndTimeSale);
     	assert.equal(getEndTimeSale, startTimeFinished);
 
 	});
 
+    it("HoldmeTokenSale #4 should stop the token sale and restart it again", async function() {
+        console.log("HoldmeTokenSale #4. BEGIN==========================================================");
+
+        let start = await tokenSale.setStartTime(startTimeInProgress);
+        let end = await tokenSale.setEndTime(startTimeFinished);
+
+        let getStartTimeSale = await tokenSale.startTime();
+        console.log("getStartTimeSale in progress = " +getStartTimeSale);
+        assert.equal(getStartTimeSale, startTimeInProgress);
+
+        let getEndTimeSale = await tokenSale.endTime();
+        console.log("getEndTimeSale  in progress = " +getEndTimeSale);
+        assert.equal(getEndTimeSale, startTimeFinished);
+        
+       
+        let saleStoppedBeforeStopped = await tokenSale.saleStopped();
+        console.log("saleStoppedBeforeStopped = " +saleStoppedBeforeStopped);
+        assert.isFalse(saleStoppedBeforeStopped);
+
+        await tokenSale.emergencyStopSale();
+
+        let saleStoppedAfterStopped = await tokenSale.saleStopped();
+        console.log("saleStoppedAfterStopped = " +saleStoppedAfterStopped);
+        assert.isTrue(saleStoppedAfterStopped);
+
+        await tokenSale.restartSale();
+
+        let saleStoppedAfterRestart = await tokenSale.saleStopped();
+        console.log("saleStoppedAfterRestart = " +saleStoppedAfterRestart);
+        assert.isFalse(saleStoppedAfterRestart);
+
+    });
 
 });	

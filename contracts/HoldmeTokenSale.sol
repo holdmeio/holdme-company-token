@@ -43,15 +43,16 @@ contract HoldmeTokenSale is Ownable, Utils {
     address public btcs = 0x0;                      // bitcoin suisse address
     bool    public preLaunch = false;               // Set pre-launch to true or false
 
-    address public devone = 0x0;                    // address Developer 1 to receive 3% Company Share
-    address public devtwo = 0x0;                    // address Developer 2 to receive 3% Company Share
-    address public devtree = 0x0;                   // address Developer 3 to receive 3% Company Share
-    address public advisor = 0x0;                   // address Advisor to receive 8% Company Share
+    address public devone = 0x0;                    // address Developer 1 to receive Company Share
+    address public devtwo = 0x0;                    // address Developer 2 to receive Company Share
+    address public devtree = 0x0;                   // address Developer 3 to receive Company Share
+    address public advisor = 0x0;                   // address Advisor to receive Company Share
 
     uint256 public shareDev = 0;
     uint256 public shareAdvisor = 0;
     uint256 public shareBeneficiary = 0;
 
+    bool public saleStopped = false;
     bool public isFinalized = false;
 
     address public owner;
@@ -90,19 +91,62 @@ contract HoldmeTokenSale is Ownable, Utils {
         shareAdvisor = _shareAdvisor;
     }
 
-    function setToken(address _token) validAddress(_token) onlyOwner returns (bool success) {
+    // fallback when investor transfering Ether to the crowdsale contract without calling any functions
+    function() payable {
+        contributeETH(msg.sender, msg.value);
+    }
+
+    // ensures that the current time is between _startTime (inclusive) and _endTime (exclusive)
+    modifier between() {
+        assert((now >= startTime && now < endTime));
+        _;
+    }
+
+    modifier only_sale_stopped {
+        assert(saleStopped);
+        _;
+    }
+
+    modifier only_sale_not_stopped {
+        assert(!saleStopped);
+        _;
+    }
+
+
+    function setToken(address _token) validAddress(_token) onlyOwner public returns (bool success) {
         token = Holdme(_token);
         return true;
     }
 
-    function setStartTime(uint256 _newStartTime) onlyOwner returns (bool success) {
+    function setStartTime(uint256 _newStartTime) onlyOwner public returns (bool success) {
         startTime = _newStartTime;
         return true;
     }
 
-    function setEndTime(uint256 _newEndTime) onlyOwner returns (bool success) {
+    function setEndTime(uint256 _newEndTime) onlyOwner public returns (bool success) {
         endTime = _newEndTime;
         return true;
+    }
+
+    // @notice Function to stop sale for an emergency.
+    // @dev Only Holdme Dev can do it after it has been activated.
+    function emergencyStopSale()
+        only_sale_not_stopped
+        onlyOwner
+        public 
+    {
+        saleStopped = true;
+    }
+
+    // @notice Function to restart stopped sale.
+    // @dev Only Holdme Dev can do it after it has been disabled and sale is ongoing.
+    function restartSale()
+        between
+        only_sale_stopped
+        onlyOwner
+        public 
+    {
+        saleStopped = false;
     }
 
     function setTokenVault(address _tokenVault) validAddress(_tokenVault) onlyOwner {
@@ -125,12 +169,6 @@ contract HoldmeTokenSale is Ownable, Utils {
         _;
     }
 
-    // ensures that the current time is between _startTime (inclusive) and _endTime (exclusive)
-    modifier between() {
-        assert((now >= startTimePreLaunch && now < endTimePreLaunch) || 
-               (now >= startTime && now < endTime));
-        _;
-    }
 
     /**
         @dev computes the number of tokens that should be issued for a given contribution
@@ -168,7 +206,7 @@ contract HoldmeTokenSale is Ownable, Utils {
 
         @return tokens issued in return
     */
-    function contributeETH(address _contributer)
+    function contributeETH(address _contributer, uint256 _amount)
         public
         payable
         //between
@@ -178,7 +216,7 @@ contract HoldmeTokenSale is Ownable, Utils {
         require(_contributer != 0x0);
         require(msg.value!=0);
         //uint256 discount = 0;
-        uint256 tokenAmount = computeReturn(msg.value);
+        uint256 tokenAmount = computeReturn(_amount);
         processContribution(_contributer, tokenAmount);
         return tokenAmount;
     }
@@ -225,10 +263,6 @@ contract HoldmeTokenSale is Ownable, Utils {
         Contribution(msg.sender, msg.value, _tokenAmount);
     }
 
-    // fallback when investor transfering Ether to the crowdsale contract without calling any functions
-    function() payable {
-        contributeETH(msg.sender);
-    }
   
     // @return true if crowdsale event has ended
     function hasEnded() public constant returns (bool) {

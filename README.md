@@ -414,6 +414,7 @@ The token balance of the devtree  should be equal to 0
 
 
 ```
+
 ### HoldmeTokenSale #3 should start the token sale
 * [X] StartTimeSale in progress should be equal to today
 * [X] getEndTimeSale in progress should be equal today + 60
@@ -425,5 +426,25 @@ HoldmeTokenSale #3. BEGIN=======================================================
 getStartTimeSale in progress= 1505266917
 getEndTimeSale  in progress= 1510450917
     ✓ HoldmeTokenSale #3 should start the token sale (109ms)
+
+```
+### HoldmeTokenSale #4 should stop the token sale and restart it again
+* [X] StartTimeSale in progress should be equal to today
+* [X] getEndTimeSale in progress should be equal today + 60
+* [X] saleStoppedBefore should be equal to false
+* [X] emergencyStopSale() function has been called
+* [X] restartSale() function has been called
+* [X] saleStoppedAfterRestart should be equal to false
+
+**Console Output:**
+```
+
+HoldmeTokenSale #4. BEGIN==========================================================
+getStartTimeSale in progress = 1505270075
+getEndTimeSale  in progress = 1510454075
+saleStoppedBeforeStopped = false
+saleStoppedAfterStopped = true
+saleStoppedAfterRestart = false
+    ✓ HoldmeTokenSale #4 should stop the token sale and restart it again (263ms)
 
 ```
