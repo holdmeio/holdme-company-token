@@ -58,6 +58,17 @@ contract HoldmeTokenSale is Ownable, Utils {
     bool public isFinalized = false;
 
 
+    /** State machine
+    *
+    * - Preparing: All contract initialization calls and variables have not been set yet
+    * - Presale: We have not passed start time yet
+    * - Sale: Active crowdsale
+    * - Success: Minimum funding goal reached
+    * - Failure: Minimum funding goal not reached before ending time
+    * - Finalized: The finalized has been called and succesfully executed
+    */
+    enum State{Unknown, Preparing, Presale, Sale, Success, Failure, Finalized}
+
     // triggered on each contribution
     event Contribution(address indexed _contributor, uint256 _amount, uint256 _return);
     event Finalized();
@@ -69,9 +80,9 @@ contract HoldmeTokenSale is Ownable, Utils {
         address _devone, 
         address _devtwo, 
         address _devthree, 
-        address _advisor,
-        uint256 _shareDev,
-        uint256 _shareAdvisor
+        address _advisor
+        //uint256 _shareDev,
+        //uint256 _shareAdvisor
     ) { 
         startTimePreLaunch = _startTimePreLaunch;
         endTimePreLaunch = endTimePreLaunch + DURATION_PRELAUNCH;
@@ -82,8 +93,8 @@ contract HoldmeTokenSale is Ownable, Utils {
         devtwo = _devtwo;
         devtree = _devthree;
         advisor = _advisor;
-        shareDev = _shareDev;
-        shareAdvisor = _shareAdvisor;
+        //shareDev = _shareDev;
+        //shareAdvisor = _shareAdvisor;
         //shareBeneficiary = _shareBeneficiary;
         //sendShares();
     }
@@ -143,10 +154,10 @@ contract HoldmeTokenSale is Ownable, Utils {
         Only executed in constructor
     */
     function sendShares() internal onlyOwner {
-        token.transfer(devone, shareDev);               
-        token.transfer(devtwo, shareDev);               
-        token.transfer(devtree, shareDev);             
-        token.transfer(advisor, shareAdvisor);        
+        token.transfer(devone, shareDev);
+        token.transfer(devtwo, shareDev);
+        token.transfer(devtree, shareDev);
+        token.transfer(advisor, shareAdvisor);
     }
 
     /**
@@ -243,5 +254,24 @@ contract HoldmeTokenSale is Ownable, Utils {
     */
     function finalization() internal {
         sendShares();
+    }
+
+
+    /**
+    * Crowdfund state machine management.
+    *
+    * We make it a function and do not assign the result to a variable, so there is no chance of the variable being stale.
+    */
+    function getState() public constant returns (State) {
+    if (isFinalized)
+        return State.Finalized;
+    else if (now < startTimePreLaunch)
+        return State.Preparing;
+    else if (startTimePreLaunch == 0 || endTimePreLaunch == 0 || startTime == 0 || endTime == 0 || beneficiary == 0)
+        return State.Preparing;
+    else if (now >= startTime && now < endTime)
+        return State.Sale;
+    else
+        return State.Failure;
     }
 }

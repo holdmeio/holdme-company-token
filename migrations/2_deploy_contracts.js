@@ -15,7 +15,7 @@ module.exports = function(deployer) {
 	const devtwo = '0xB42b8f0aac75c7231AF3d9403cCFBE667892d2Cf'; //yohanes
 	const devtree = '0x2d0156a30af6856cb7d3cf5bb10061e780589751'; //arif 
 	const advisor = '0xe377C8b3b3A5427E5E9AbA8C46BCd3F506ED9D38'; //elky metamask TEST
-	const shareDev = 9000000 * Math.pow(10,18);
+	const shareDev = 6000000 * Math.pow(10,18);
 	const shareAdvisor = 24000000 * Math.pow(10,18);
 
     deployer.deploy(Holdme, HOLDME_MULTISIG, INITIAL_SUPPLY, TOKEN_NAME, TOKEN_SYMBOL, DECIMALS);
