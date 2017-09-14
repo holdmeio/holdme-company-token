@@ -12,21 +12,22 @@ pragma solidity ^0.4.15;
 
 import './Holdme.sol/';
 import '../installed_contracts/ERC23/contracts/Utils.sol/';
-import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/lifecycle/Pausable.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol';
+import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/lifecycle/Pausable.sol';
+//import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/Token/TokenTimelock.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
-import './TokenVault.sol';
+//import './TokenVault.sol';
 import './PricingScheme.sol';
 
 contract HoldmeTokenSale is Ownable, Utils, Pausable {
     using SafeMath for uint256;
 
-    uint256 public constant TOKEN_PRICE_N = 1;            // initial price in wei (numerator)
-    uint256 public constant TOKEN_PRICE_D = 100;          // initial price in wei (denominator)
+    uint256 public constant TOKEN_PRICE_N = 1;                  // initial price in wei (numerator)
+    uint256 public constant TOKEN_PRICE_D = 100;                // initial price in wei (denominator)
     uint256 public constant MAX_GAS_PRICE = 50000000000 wei;    // maximum gas price for contribution transactions
 
     Holdme public token;        // The token
-    TokenVault public tokenVault;                   // Token Vault where addresses are stored before tokens are released
+    //TokenVault public tokenVault;                 // Token Vault where addresses are stored before tokens are released
     PricingScheme public pricingScheme;
 
     string public version = "0.1";
@@ -74,6 +75,8 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
         uint256 _shareDev,
         uint256 _shareAdvisor
     ) { 
+        require(_startTime >= now &&
+                _endTime >= _startTime);
 
         if (_centralAdmin != 0) {
           owner = _centralAdmin;
@@ -127,22 +130,27 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
 
     function setStartTime(uint256 _newStartTime) 
         public 
+        greaterThanZero(_newStartTime)
         onlyOwner 
         returns (bool success) 
     {
+        require(_newStartTime >= now);
+
         startTime = _newStartTime;
         return true;
     }
 
     function setEndTime(uint256 _newEndTime) 
         public 
+        greaterThanZero(_newEndTime)
         onlyOwner
         returns (bool success) 
     {
+        require(_newEndTime >= startTime);
         endTime = _newEndTime;
         return true;
     }
-
+    /*
     function setTokenVault(address _tokenVault) 
         public
         validAddress(_tokenVault)
@@ -150,6 +158,7 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
     {
         tokenVault = TokenVault(_tokenVault);
     }
+    */
 
     function setPricingScheme(address _pricingScheme) 
         public
@@ -184,6 +193,8 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
         payable
         between
         tokenMaxCapNotReached
+        validAddress(_contributer)
+        greaterThanZero(_amount)
         returns (uint256 amount)
     {
         require(_contributer != 0x0 &&
@@ -205,6 +216,8 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
         payable
         onlyOwner
         tokenMaxCapNotReached
+        validAddress(_contributer)
+        greaterThanZero(_amount)
         returns (uint256 amount)
     {
         require(_contributer != 0x0 &&
@@ -230,7 +243,7 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
         assert(beneficiary.send(_ethAmount)); // transfer the ether to the beneficiary account
         totalEtherContributed = totalEtherContributed.add(_ethAmount);// update the total contribution amount
 
-        tokenVault.setInvestor(_contributer, _tokenAmount);
+        //tokenVault.setInvestor(_contributer, _tokenAmount);
         totalTokenIssued = totalTokenIssued.add(_tokenAmount);
 
         Contribution(_contributer, _ethAmount, _tokenAmount);

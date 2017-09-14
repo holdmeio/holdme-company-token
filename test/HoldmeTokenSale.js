@@ -1,5 +1,14 @@
 'use strict';
 
+const BigNumber = web3.BigNumber
+
+require('chai')
+  .use(require('chai-as-promised'))
+  .use(require('chai-bignumber')(BigNumber))
+  .should()
+
+import latestTime from '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/test/helpers/latestTime'
+import {increaseTimeTo, duration} from '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/test/helpers/increaseTime'
 
 const assertJump = require('../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/test/helpers/assertJump');
 var Holdme = artifacts.require('../contracts/Holdme.sol');
