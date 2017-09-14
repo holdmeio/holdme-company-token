@@ -12,12 +12,13 @@ pragma solidity ^0.4.15;
 
 import './Holdme.sol/';
 import '../installed_contracts/ERC23/contracts/Utils.sol/';
+import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/lifecycle/Pausable.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
 import './TokenVault.sol';
 import './PricingScheme.sol';
 
-contract HoldmeTokenSale is Ownable, Utils {
+contract HoldmeTokenSale is Ownable, Utils, Pausable {
     using SafeMath for uint256;
 
     uint256 public constant TOKEN_PRICE_N = 1;            // initial price in wei (numerator)
@@ -52,7 +53,6 @@ contract HoldmeTokenSale is Ownable, Utils {
     uint256 public shareAdvisor = 0;
     uint256 public shareBeneficiary = 0;
 
-    bool public saleStopped = false;
     bool public isFinalized = false;
 
     address public owner;
@@ -102,16 +102,6 @@ contract HoldmeTokenSale is Ownable, Utils {
         _;
     }
 
-    modifier only_sale_stopped {
-        assert(saleStopped);
-        _;
-    }
-
-    modifier only_sale_not_stopped {
-        assert(!saleStopped);
-        _;
-    }
-
     // ensures that we didn't reach the token max cap
     modifier tokenMaxCapNotReached() {
         assert(totalTokenIssued <= totalTokenCap);
@@ -152,28 +142,6 @@ contract HoldmeTokenSale is Ownable, Utils {
         endTime = _newEndTime;
         return true;
     }
-
-    // @notice Function to stop sale for an emergency.
-    // @dev Only Holdme Dev can do it after it has been activated.
-    function emergencyStopSale()
-        public
-        only_sale_not_stopped
-        onlyOwner
-    {
-        saleStopped = true;
-    }
-
-    // @notice Function to restart stopped sale.
-    // @dev Only Holdme Dev can do it after it has been disabled and sale is ongoing.
-    function restartSale()
-        public
-        between
-        only_sale_stopped
-        onlyOwner 
-    {
-        saleStopped = false;
-    }
-
 
     function setTokenVault(address _tokenVault) 
         public

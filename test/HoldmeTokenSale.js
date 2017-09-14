@@ -175,19 +175,19 @@ contract('HoldmeTokenSale', function(accounts) {
         assert.equal(getEndTimeSale, startTimeFinished);
         
        
-        let saleStoppedBeforeStopped = await tokenSale.saleStopped();
+        let saleStoppedBeforeStopped = await tokenSale.paused();
         console.log("saleStoppedBeforeStopped = " +saleStoppedBeforeStopped);
         assert.isFalse(saleStoppedBeforeStopped);
 
-        await tokenSale.emergencyStopSale();
+        await tokenSale.pause();
 
-        let saleStoppedAfterStopped = await tokenSale.saleStopped();
+        let saleStoppedAfterStopped = await tokenSale.paused();
         console.log("saleStoppedAfterStopped = " +saleStoppedAfterStopped);
         assert.isTrue(saleStoppedAfterStopped);
 
-        await tokenSale.restartSale();
+        await tokenSale.unpause();
 
-        let saleStoppedAfterRestart = await tokenSale.saleStopped();
+        let saleStoppedAfterRestart = await tokenSale.paused();
         console.log("saleStoppedAfterRestart = " +saleStoppedAfterRestart);
         assert.isFalse(saleStoppedAfterRestart);
 
