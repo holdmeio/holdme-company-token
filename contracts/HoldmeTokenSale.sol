@@ -10,24 +10,24 @@ pragma solidity ^0.4.15;
  *
  */
 
-import '../installed_contracts/ERC23/contracts/UpgradeableStandard23Token.sol/';
+import './Holdme.sol/';
 import '../installed_contracts/ERC23/contracts/Utils.sol/';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol';
+import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/lifecycle/Pausable.sol';
+//import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/Token/TokenTimelock.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
-import './TokenVault.sol';
+//import './TokenVault.sol';
 import './PricingScheme.sol';
 
-contract HoldmeTokenSale is Ownable, Utils {
+contract HoldmeTokenSale is Ownable, Utils, Pausable {
     using SafeMath for uint256;
 
-    uint256 public constant DURATION_PRELAUNCH = 14 days; // Pre-Launch crowdsale duration
-    uint256 public constant DURATION = 60 days;           // crowdsale duration
-    uint256 public constant TOKEN_PRICE_N = 1;            // initial price in wei (numerator)
-    uint256 public constant TOKEN_PRICE_D = 100;          // initial price in wei (denominator)
+    uint256 public constant TOKEN_PRICE_N = 1;                  // initial price in wei (numerator)
+    uint256 public constant TOKEN_PRICE_D = 100;                // initial price in wei (denominator)
     uint256 public constant MAX_GAS_PRICE = 50000000000 wei;    // maximum gas price for contribution transactions
 
-    UpgradeableStandard23Token public token;        // The token
-    TokenVault public tokenVault;                   // Token Vault where addresses are stored before tokens are released
+    Holdme public token;        // The token
+    //TokenVault public tokenVault;                 // Token Vault where addresses are stored before tokens are released
     PricingScheme public pricingScheme;
 
     string public version = "0.1";
@@ -46,16 +46,18 @@ contract HoldmeTokenSale is Ownable, Utils {
     address public btcs = 0x0;                      // bitcoin suisse address
     bool    public preLaunch = false;               // Set pre-launch to true or false
 
-    address public devone = 0x0;                    // address Developer 1 to receive 3% Company Share
-    address public devtwo = 0x0;                    // address Developer 2 to receive 3% Company Share
-    address public devtree = 0x0;                   // address Developer 3 to receive 3% Company Share
-    address public advisor = 0x0;                   // address Advisor to receive 8% Company Share
+    address public devone = 0x0;                    // address Developer 1 to receive Company Share
+    address public devtwo = 0x0;                    // address Developer 2 to receive Company Share
+    address public devtree = 0x0;                   // address Developer 3 to receive Company Share
+    address public advisor = 0x0;                   // address Advisor to receive Company Share
 
     uint256 public shareDev = 0;
     uint256 public shareAdvisor = 0;
     uint256 public shareBeneficiary = 0;
 
     bool public isFinalized = false;
+
+    address public owner;
 
 
     /** State machine
@@ -74,8 +76,14 @@ contract HoldmeTokenSale is Ownable, Utils {
     event Finalized();
 
     function HoldmeTokenSale (
+<<<<<<< HEAD
         uint256 _startTimePreLaunch,
         uint256 _startTime, 
+=======
+        address _centralAdmin,
+        uint256 _startTime, 
+        uint256 _endTime, 
+>>>>>>> ec95b88a2949fa988dca6c571732a5719779304e
         address _beneficiary, 
         address _devone, 
         address _devtwo, 
@@ -84,15 +92,29 @@ contract HoldmeTokenSale is Ownable, Utils {
         //uint256 _shareDev,
         //uint256 _shareAdvisor
     ) { 
+<<<<<<< HEAD
         startTimePreLaunch = _startTimePreLaunch;
         endTimePreLaunch = endTimePreLaunch + DURATION_PRELAUNCH;
         startTime = _startTime;
         endTime = startTime + DURATION;
+=======
+        require(_startTime >= now &&
+                _endTime >= _startTime);
+
+        if (_centralAdmin != 0) {
+          owner = _centralAdmin;
+        } else {
+          owner = msg.sender;
+        }
+        startTime = _startTime;
+        endTime = _endTime;
+>>>>>>> ec95b88a2949fa988dca6c571732a5719779304e
         beneficiary = _beneficiary;
         devone = _devone;
         devtwo = _devtwo;
         devtree = _devthree;
         advisor = _advisor;
+<<<<<<< HEAD
         //shareDev = _shareDev;
         //shareAdvisor = _shareAdvisor;
         //shareBeneficiary = _shareBeneficiary;
@@ -101,14 +123,21 @@ contract HoldmeTokenSale is Ownable, Utils {
 
     function setToken(address _token) validAddress(_token) onlyOwner {
         token = UpgradeableStandard23Token(_token);
+=======
+        shareDev = _shareDev;
+        shareAdvisor = _shareAdvisor;
+>>>>>>> ec95b88a2949fa988dca6c571732a5719779304e
     }
 
-    function setTokenVault(address _tokenVault) validAddress(_tokenVault) onlyOwner {
-        tokenVault = TokenVault(_tokenVault);
+    // fallback when investor transfering Ether to the crowdsale contract without calling any functions
+    function() payable {
+        contributeETH(msg.sender, msg.value);
     }
 
-    function setPricingScheme(address _pricingScheme) validAddress(_pricingScheme) onlyOwner {
-        pricingScheme = PricingScheme(_pricingScheme);
+    // ensures that the current time is between _startTime (inclusive) and _endTime (exclusive)
+    modifier between() {
+        assert((now >= startTime && now < endTime));
+        _;
     }
 
     // ensures that we didn't reach the token max cap
@@ -123,12 +152,57 @@ contract HoldmeTokenSale is Ownable, Utils {
         _;
     }
 
-    // ensures that the current time is between _startTime (inclusive) and _endTime (exclusive)
-    modifier between() {
-        assert((now >= startTimePreLaunch && now < endTimePreLaunch) || 
-               (now >= startTime && now < endTime));
-        _;
+
+    function setToken(address _token) 
+        public 
+        validAddress(_token)
+        onlyOwner
+        returns (bool success)
+    {
+        token = Holdme(_token);
+        return true;
     }
+
+    function setStartTime(uint256 _newStartTime) 
+        public 
+        greaterThanZero(_newStartTime)
+        onlyOwner 
+        returns (bool success) 
+    {
+        require(_newStartTime >= now);
+
+        startTime = _newStartTime;
+        return true;
+    }
+
+    function setEndTime(uint256 _newEndTime) 
+        public 
+        greaterThanZero(_newEndTime)
+        onlyOwner
+        returns (bool success) 
+    {
+        require(_newEndTime >= startTime);
+        endTime = _newEndTime;
+        return true;
+    }
+    /*
+    function setTokenVault(address _tokenVault) 
+        public
+        validAddress(_tokenVault)
+        onlyOwner
+    {
+        tokenVault = TokenVault(_tokenVault);
+    }
+    */
+
+    function setPricingScheme(address _pricingScheme) 
+        public
+        validAddress(_pricingScheme) 
+        onlyOwner
+    {
+        pricingScheme = PricingScheme(_pricingScheme);
+    }
+
 
     /**
         @dev computes the number of tokens that should be issued for a given contribution
@@ -141,6 +215,7 @@ contract HoldmeTokenSale is Ownable, Utils {
         return (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N);
     }
 
+<<<<<<< HEAD
     function percent(uint256 numerator, uint256 denominator, uint256 precision) private constant returns(uint quotient) {
         // caution, check safe-to-multiply here
         uint256 _numerator  = numerator * 10 ** (precision.add(1));
@@ -159,6 +234,9 @@ contract HoldmeTokenSale is Ownable, Utils {
         token.transfer(devtree, shareDev);
         token.transfer(advisor, shareAdvisor);
     }
+=======
+  
+>>>>>>> ec95b88a2949fa988dca6c571732a5719779304e
 
     /**
         @dev ETH contribution
@@ -166,18 +244,28 @@ contract HoldmeTokenSale is Ownable, Utils {
 
         @return tokens issued in return
     */
-    function contributeETH(address _contributer)
+    function contributeETH(address _contributer, uint256 _amount)
         public
         payable
-        //between
+        between
         tokenMaxCapNotReached
+        validAddress(_contributer)
+        greaterThanZero(_amount)
         returns (uint256 amount)
     {
+<<<<<<< HEAD
         require(_contributer != 0x0);
         require(msg.value!=0);
         //uint256 discount = 0;
         uint256 tokenAmount = pricingScheme.calculatePrice(msg.value,1);
         processContribution(_contributer, tokenAmount);
+=======
+        require(_contributer != 0x0 &&
+                _amount > 0);
+
+        uint256 tokenAmount = computeReturn(_amount);
+        processContribution(_contributer, _amount, tokenAmount);
+>>>>>>> ec95b88a2949fa988dca6c571732a5719779304e
         return tokenAmount;
     }
 
@@ -187,18 +275,28 @@ contract HoldmeTokenSale is Ownable, Utils {
 
         @return tokens issued in return
     */
-    function contributeBTC(address _contributer, uint256 _btcToEthPrice)
+    function contributeBTC(address _contributer, uint256 _amount, uint256 _btcToEthPrice)
         public
         payable
         onlyOwner
         tokenMaxCapNotReached
+        validAddress(_contributer)
+        greaterThanZero(_amount)
         returns (uint256 amount)
     {
+<<<<<<< HEAD
         require(_contributer != 0x0);
         require(msg.value!=0);
         //uint256 discount = 0;
         uint256 tokenAmount = pricingScheme.calculatePrice(msg.value.mul(_btcToEthPrice),1);
         processContribution(_contributer, tokenAmount);
+=======
+        require(_contributer != 0x0 &&
+                _amount > 0);
+
+        uint256 tokenAmount = computeReturn(_amount.mul(_btcToEthPrice));
+        processContribution(_contributer, _amount, tokenAmount);
+>>>>>>> ec95b88a2949fa988dca6c571732a5719779304e
         return tokenAmount;
     }
 
@@ -208,25 +306,21 @@ contract HoldmeTokenSale is Ownable, Utils {
 
         @return tokens issued in return
     */
-    function processContribution(address _contributer, uint256 _tokenAmount) private
+    function processContribution(address _contributer, uint256 _ethAmount, uint256 _tokenAmount) 
+        private
         onlyOwner
         tokenMaxCapNotReached()
         validGasPrice
     {
-        assert(beneficiary.send(msg.value)); // transfer the ether to the beneficiary account
-        totalEtherContributed = totalEtherContributed.add(msg.value);// update the total contribution amount
+        assert(beneficiary.send(_ethAmount)); // transfer the ether to the beneficiary account
+        totalEtherContributed = totalEtherContributed.add(_ethAmount);// update the total contribution amount
 
-        tokenVault.setInvestor(_contributer, _tokenAmount);
-        //token.transfer(_contributer, _tokenAmount); // issue new funds to the contributor in the smart token
+        //tokenVault.setInvestor(_contributer, _tokenAmount);
         totalTokenIssued = totalTokenIssued.add(_tokenAmount);
 
-        Contribution(msg.sender, msg.value, _tokenAmount);
+        Contribution(_contributer, _ethAmount, _tokenAmount);
     }
 
-    // fallback when investor transfering Ether to the crowdsale contract without calling any functions
-    function() payable {
-        contributeETH(msg.sender);
-    }
   
     // @return true if crowdsale event has ended
     function hasEnded() public constant returns (bool) {
@@ -256,6 +350,7 @@ contract HoldmeTokenSale is Ownable, Utils {
         sendShares();
     }
 
+<<<<<<< HEAD
 
     /**
     * Crowdfund state machine management.
@@ -275,3 +370,16 @@ contract HoldmeTokenSale is Ownable, Utils {
         return State.Failure;
     }
 }
+=======
+    /**
+        Sending Company shares for the Team
+        Only executed in constructor
+    */
+    function sendShares() internal onlyOwner{
+        token.transfer(devone, shareDev);               
+        token.transfer(devtwo, shareDev);               
+        token.transfer(devtree, shareDev);             
+        token.transfer(advisor, shareAdvisor);        
+    }
+}
+>>>>>>> ec95b88a2949fa988dca6c571732a5719779304e

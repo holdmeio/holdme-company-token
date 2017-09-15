@@ -15,30 +15,27 @@ pragma solidity ^0.4.15;
  *
  */
 
-import '../installed_contracts/ERC23/contracts/Standard23Token.sol';
+import '../installed_contracts/ERC23/contracts/UpgradeableStandard23Token.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
 
 
-contract Holdme is Ownable, Standard23Token {
-
-  bytes32 public name = "Hold Me";
-  bytes32 public symbol = "HME";
-  uint256 public decimals = 18;
+contract Holdme is Ownable, UpgradeableStandard23Token {
 
   address public owner;
 
 
-  function Holdme(address _centralAdmin) {
+  function Holdme(address _centralAdmin, uint256 _initialBalance, bytes32 _name, bytes32 _symbol, uint256 _decimals) {
     if (_centralAdmin != 0) {
       owner = _centralAdmin;
     } else {
       owner = msg.sender;
     }
-    // 100% HME company shares = 300.000.000 HME Tokens
-    totalSupply = 300000000 * 10**18;
-    // Balance of Token address will be 100% of the HME company shares when initialize the contract 
-    balances[this] = totalSupply;
+    name = _name;
+    symbol = _symbol;
+    decimals = _decimals;
+    balances[owner] = _initialBalance; // balance of Token address will be 100% of the HME company shares when initialize the contract 
+    totalSupply = _initialBalance;
   }
 
 }

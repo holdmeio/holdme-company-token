@@ -42,7 +42,13 @@ contract PricingScheme is Ownable {
   /// @param _milestones uint[] milestones Pairs of (time, price)
   function PricingScheme(uint[] _milestones) {
     // Need to have tuples, length check
+<<<<<<< HEAD
     assert(!(_milestones.length % 2 == 1 || _milestones.length >= MAX_MILESTONE*2));
+=======
+    if(_milestones.length % 2 == 1 || _milestones.length >= MAX_MILESTONE*2) {
+      //throw;
+    }
+>>>>>>> ec95b88a2949fa988dca6c571732a5719779304e
 
     milestoneCount = _milestones.length / 2;
 
@@ -53,13 +59,25 @@ contract PricingScheme is Ownable {
       milestones[i].price = _milestones[i*2+1];
 
       // No invalid steps
+<<<<<<< HEAD
       assert(!((lastTimestamp != 0) && (milestones[i].time <= lastTimestamp)));
+=======
+      if((lastTimestamp != 0) && (milestones[i].time <= lastTimestamp)) {
+        //throw;
+      }
+>>>>>>> ec95b88a2949fa988dca6c571732a5719779304e
 
       lastTimestamp = milestones[i].time;
     }
 
     // Last milestone price must be zero, terminating the crowdale
+<<<<<<< HEAD
     assert(!(milestones[milestoneCount-1].price != 0));
+=======
+    if(milestones[milestoneCount-1].price != 0) {
+      //throw;
+    }
+>>>>>>> ec95b88a2949fa988dca6c571732a5719779304e
   }
 
   /// @dev Iterate through milestones. You reach end of milestones when price = 0
@@ -112,7 +130,11 @@ contract PricingScheme is Ownable {
   }
 
   function() payable {
+<<<<<<< HEAD
     revert(); // No money on this contract
+=======
+    //throw; // No money on this contract
+>>>>>>> ec95b88a2949fa988dca6c571732a5719779304e
   }
 
 }

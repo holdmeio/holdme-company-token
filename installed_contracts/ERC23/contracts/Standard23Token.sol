@@ -1,6 +1,7 @@
 
 pragma solidity ^0.4.15;
 
+import './Utils.sol';
 import './interface/ERC23.sol';
 import './interface/ERC23Receiver.sol';
 import './Basic23Token.sol';
@@ -9,13 +10,13 @@ import '../installed_contracts/zeppelin-solidity/contracts/token/StandardToken.s
 /**
  * @title Standard ERC23 token
  * @dev Implementation of the basic standard token ERC23.
-*
+ *
  * created by IAM <DEV> (Elky Bachtiar) 
  * https://www.iamdeveloper.io
  * Changes made base on ERC20 Token Stadard and Solidity version 0.4.13
  * https://theethereum.wiki/w/index.php/ERC20_Token_Standard
  */
-contract Standard23Token is ERC23, Basic23Token, StandardToken {
+contract Standard23Token is Utils, ERC23, Basic23Token, StandardToken {
 
     /**
      * @dev Transfer tokens from one address to another
@@ -28,20 +29,22 @@ contract Standard23Token is ERC23, Basic23Token, StandardToken {
      * @param _data is arbitrary data sent with the token transferFrom. Simulates ether tx.data
      * @return bool successful or not
    */
-    function transferFrom(address _from, address _to, uint256 _value, bytes _data) returns (bool success) {
+    function transferFrom(address _from, address _to, uint256 _value, bytes _data)
+        validAddresses(_from, _to) 
+        greaterThanZero(_value)
+        returns (bool success)
+    {
         // Ensure _from has enough balance to send amount 
         // and ensure the send _value is greater than 0
         // and ensure allowed[_from][msg.sender] is greate or equal to send amount to send
         // and Detect balance overflow
         require(
-                balances[_from] >= _value 
-                && _value > 0
-                && allowed[_from][msg.sender] >= _value
-                && balances[_to].add(_value) > balances[_to]
+                balances[_from] >= _value && 
+                allowed[_from][msg.sender] >= _value &&
+                balances[_to].add(_value) > balances[_to]
         );
 
         if (_value > 0 && _from != _to) {
-          //return super.transferFrom(_from, _to, _value);
             require(super.transferFrom(_from, _to, _value)); // do a normal token transfer
             if (isContract(_to)) {
                 return contractFallback(_from, _to, _value, _data);
@@ -61,7 +64,11 @@ contract Standard23Token is ERC23, Basic23Token, StandardToken {
      * @param _value uint256 the amout of tokens to be transfered
      * @return bool successful or not
      */
-    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    function transferFrom(address _from, address _to, uint256 _value)
+        validAddresses(_from, _to) 
+        greaterThanZero(_value)
+        returns (bool success)
+    {
         // Ensure _from has enough balance to send amount 
         // and ensure the send _value is greater than 0
         // and ensure allowed[_from][msg.sender] is greate or equal to send amount to send
@@ -76,6 +83,9 @@ contract Standard23Token is ERC23, Basic23Token, StandardToken {
         return transferFrom(_from, _to, _value, new bytes(0));
     }
 
+    //compareAndApprove workaround is fixed by OpenZeppelin!!!
+    // With the OpenZeppelin ERC20 is now possible toincrease and decrease approval
+    
     // A vulernability of the approve method in the ERC20 standard was identified by
     // Mikhail Vladimirov and Dmitry Khovratovich here:
     // https://docs.google.com/document/d/1YLPtQxZu1UAvO9cZ1O2RPXBbT0mooh4DYKjA_jp-RLM
