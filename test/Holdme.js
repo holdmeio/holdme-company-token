@@ -12,6 +12,7 @@ contract('Holdme', function(accounts) {
  	let SPENDER_ACCOUNT = accounts[2]
 
  	const INITAL_SUPPLY = 300000000;
+ 	const MINT_AMOUNT = 100;
  	const TRANSFER_AMOUNT = 10000;
  	const APPROVE_AMOUNT = 1000;
 
@@ -308,28 +309,74 @@ contract('Holdme', function(accounts) {
   	});
 
   	describe('Holdme #10 validating allowance updates to spender', function() {
-    console.log("Holdme #10 BEGIN==========================================================");
+    	console.log("Holdme #10 BEGIN==========================================================");
 
-    it('Approval should start with zero and should increase by 50 then decrease by 10', async function() {
+    	it('Approval should start with zero and should increase by 50 then decrease by 10', async function() {
       
-      let preApproved;
-  
-      preApproved = await token.allowance(MAIN_ACCOUNT, SPENDER_ACCOUNT);
-      console.log("preApproved = " +preApproved);
-      assert.equal(preApproved, 0);
+	      let preApproved;
+	  
+	      preApproved = await token.allowance(MAIN_ACCOUNT, SPENDER_ACCOUNT);
+	      console.log("preApproved = " +preApproved);
+	      assert.equal(preApproved, 0);
 
-      await token.increaseApproval(SPENDER_ACCOUNT, 50);
-      console.log("Increse approval to  50");
-      let postIncrease = await token.allowance(MAIN_ACCOUNT, SPENDER_ACCOUNT);
-      console.log("PostIncrese allowance = " +postIncrease);
-      assert.equal(postIncrease,50);
-      
-      await token.decreaseApproval(SPENDER_ACCOUNT, 10);
-      console.log("Increse approval by 10");
-      let postDecrease = await token.allowance(MAIN_ACCOUNT, SPENDER_ACCOUNT);
-      console.log("postDecrease allowance = " +postDecrease);
-      assert.equal(postDecrease,40);
-    })
-  });
+	      await token.increaseApproval(SPENDER_ACCOUNT, 50);
+	      console.log("Increse approval to  50");
+	      let postIncrease = await token.allowance(MAIN_ACCOUNT, SPENDER_ACCOUNT);
+	      console.log("PostIncrese allowance = " +postIncrease);
+	      assert.equal(postIncrease,50);
+	      
+	      await token.decreaseApproval(SPENDER_ACCOUNT, 10);
+	      console.log("Increse approval by 10");
+	      let postDecrease = await token.allowance(MAIN_ACCOUNT, SPENDER_ACCOUNT);
+	      console.log("postDecrease allowance = " +postDecrease);
+	      assert.equal(postDecrease,40);
+	    })
+	 });
+
+  	it('Holdme #11 should mint a given amount of tokens to a given address', async function() {
+        console.log("Holdme #11 BEGIN==========================================================");
+
+        let mainAccountBalanceBeforeMint = await token.balanceOf(MAIN_ACCOUNT);
+        console.log("mainAccountBalanceBeforeMint = " +mainAccountBalanceBeforeMint +" should equal to INITAL_SUPPLY = " +INITAL_SUPPLY);
+        assert.equal(mainAccountBalanceBeforeMint, INITAL_SUPPLY);
+
+        const result = await token.mint(MAIN_ACCOUNT, MINT_AMOUNT);
+
+        const balanceAfter = INITAL_SUPPLY + MINT_AMOUNT;
+
+        let mainAccountBalanceAfterMint = await token.balanceOf(MAIN_ACCOUNT);
+        console.log("mainAccountBalanceAfterMint = " +mainAccountBalanceAfterMint +" should equal to INITAL_SUPPLY + MINT_AMOUNT = " +balanceAfter);
+        assert.equal(mainAccountBalanceAfterMint, balanceAfter);
+
+    
+        let totalSupplyAfterMint = await token.totalSupply();
+        console.log("totalSupplyAfterMint = " +totalSupplyAfterMint +" should equal to INITAL_SUPPLY + MINT_AMOUNT = " +balanceAfter);
+        assert(totalSupplyAfterMint, balanceAfter);
+    });
+
+    it('Holdme #12 should fail to mint after call to finishMinting', async function () {
+        console.log("Holdme #12 BEGIN==========================================================");
+
+        let mainAccountBalanceBeforeMint = await token.balanceOf(MAIN_ACCOUNT);
+        console.log("mainAccountBalanceBeforeMint = " +mainAccountBalanceBeforeMint +" should equal to INITAL_SUPPLY = " +INITAL_SUPPLY);
+        assert.equal(mainAccountBalanceBeforeMint, INITAL_SUPPLY);
+
+        await token.finishMinting();
+        var mintingFinished = await token.mintingFinished();
+        console.log("mintingFinished = " +mintingFinished);
+        assert.equal(mintingFinished, true);
+        try {
+        	await token.mint(RECEIVING_ACCOUNT, MINT_AMOUNT);
+        } catch(error) {
+	     	let receivingAccountBalanceAfterMint = await token.balanceOf(RECEIVING_ACCOUNT);
+        	console.log("receivingAccountBalanceAfterMint = " +receivingAccountBalanceAfterMint +" should equal to  0=");
+        	assert.equal(mainAccountBalanceAfterMint, INITAL_SUPPLY);
+			return assertJump(error);
+	    }
+	    assert.fail('should have thrown before');
+
+
+        
+    });
 
 });

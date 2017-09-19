@@ -75,9 +75,6 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
         uint256 _shareDev,
         uint256 _shareAdvisor
     ) { 
-        require(_startTime >= now &&
-                _endTime >= _startTime);
-
         if (_centralAdmin != 0) {
           owner = _centralAdmin;
         } else {
@@ -134,8 +131,6 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
         onlyOwner 
         returns (bool success) 
     {
-        require(_newStartTime >= now);
-
         startTime = _newStartTime;
         return true;
     }

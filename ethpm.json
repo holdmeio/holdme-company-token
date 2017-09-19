@@ -1,0 +1,18 @@
+{
+  "package_name": "Holdme Company Token",
+  "version": "1.0.0",
+  "description": "Holdme is an Artificial Intelligence LIVE Chat Powerd by Ethereum Blockchain",
+  "authors": [
+    "IaM <DEV> (Elky Bachtiar) <info@iamdeveloper.io>"
+  ],
+  "keywords": [
+    "holdmeio",
+    "hold me",
+    "smart",
+    "contracts",
+    "live chat",
+    "Company Token",
+    "chat"
+  ],
+  "license": "MIT"
+}

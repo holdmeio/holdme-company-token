@@ -29,7 +29,7 @@ module.exports = function(deployer, network, accounts) {
 
 	if (network == 'development') {
 		deployer.deploy(Holdme, OWNER_TESTRPC, INITIAL_SUPPLY, TOKEN_NAME, TOKEN_SYMBOL, DECIMALS);
-    	deployer.deploy(HoldmeTokenSale, 
+    	/*deployer.deploy(HoldmeTokenSale, 
     					beneficiary_testrpc, 
     					devone_testrpc, 
     					devtwo_testrpc, 
@@ -37,11 +37,11 @@ module.exports = function(deployer, network, accounts) {
     					advisor_testrpc, 
     					shareDev, 
     					shareAdvisor
-    	);
+    	);*/
 
 	} else if (network == 'ropsten' || network == 'ropsten_gilang') {
 		deployer.deploy(Holdme, OWNER_TESTRPC, INITIAL_SUPPLY, TOKEN_NAME, TOKEN_SYMBOL, DECIMALS);
-    	deployer.deploy(HoldmeTokenSale, beneficiary, devone, devtwo, devtree, advisor, shareDev, shareAdvisor);
+    	//deployer.deploy(HoldmeTokenSale, beneficiary, devone, devtwo, devtree, advisor, shareDev, shareAdvisor);
 
 	}	
 };

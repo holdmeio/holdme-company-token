@@ -62,7 +62,7 @@ contract('HoldmeTokenSale', function(accounts) {
 	it("HoldmeTokenSale #1 should return the correct information after construction", async function() {
  		console.log("HoldmeTokenSale #1. BEGIN==========================================================");
 
-
+        
 		let getBeneficiary = await tokenSale.beneficiary();
     	console.log("getBeneficiary = " +getBeneficiary);
     	assert.equal(getBeneficiary.toUpperCase(), beneficiary.toUpperCase());
@@ -100,6 +100,7 @@ contract('HoldmeTokenSale', function(accounts) {
     	assert.equal(getEndTimeSale, endTimeSale);
     	
 	});
+
 
 	beforeEach(async () => {
     	await tokenSale.setToken(tokenAddress);
