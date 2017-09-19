@@ -17,7 +17,7 @@ import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contr
 //import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/Token/TokenTimelock.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
 //import './TokenVault.sol';
-import './PricingScheme.sol';
+//import './PricingScheme.sol';
 
 contract HoldmeTokenSale is Ownable, Utils, Pausable {
     using SafeMath for uint256;
@@ -28,7 +28,7 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
 
     Holdme public token;        // The token
     //TokenVault public tokenVault;                 // Token Vault where addresses are stored before tokens are released
-    PricingScheme public pricingScheme;
+    //PricingScheme public pricingScheme;
 
     string public version = "0.1";
 
@@ -159,14 +159,14 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
         tokenVault = TokenVault(_tokenVault);
     }
     */
-
+/*
     function setPricingScheme(address _pricingScheme) 
         public
         validAddress(_pricingScheme) 
         onlyOwner
     {
         pricingScheme = PricingScheme(_pricingScheme);
-    }
+    }*/
 
 
     /**
