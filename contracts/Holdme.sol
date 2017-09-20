@@ -22,8 +22,7 @@ import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contr
 
 contract Holdme is Ownable, UpgradeableStandard23Token {
 
-    address public owner;
-    bool public mintingFinished = false;
+    bool public issuanceFinished = false;
 
 
     function Holdme(address _centralAdmin, uint256 _initialBalance, bytes32 _name, bytes32 _symbol, uint256 _decimals) {
@@ -39,36 +38,36 @@ contract Holdme is Ownable, UpgradeableStandard23Token {
         totalSupply = _initialBalance;
     }
 
-    event Mint(address indexed to, uint256 amount);
-    event MintFinished();
+    event Issuance(uint256 _amount);
+    event IssueFinished();
 
-    modifier canMint() {
-        require(!mintingFinished);
+    modifier canIssue() {
+        require(!issuanceFinished);
         _;
     }
 
     /**
-    * @dev Function to mint tokens
-    * @param _to The address that will receive the minted tokens.
-    * @param _amount The amount of tokens to mint.
+    * @dev Function to issue tokens
+    * @param _to The address that will receive the tokens.
+    * @param _amount The amount of tokens to issue.
     * @return A boolean that indicates if the operation was successful.
     */
-    function mint(address _to, uint256 _amount) onlyOwner canMint returns (bool) {
+    function issue(address _to, uint256 _amount) public onlyOwner canIssue returns (bool success) 
         totalSupply = totalSupply.add(_amount);
         balances[_to] = balances[_to].add(_amount);
-        Mint(_to, _amount);
-        Transfer(0x0, _to, _amount);
+        Issuance(_amount);
+        Transfer(this, _to, _amount);
         return true;
     }
 
-    /**
-    * @dev Function to stop minting new tokens.
+    /*
+    **
+    * @dev Function to stop issue new tokens.
     * @return True if the operation was successful.
     */
-    function finishMinting() onlyOwner returns (bool) {
-        mintingFinished = true;
-        MintFinished();
+    function finishIssuance() public onlyOwner returns (bool) {
+        issuanceFinished = true;
+        IssueFinished();
         return true;
     }
-
 }

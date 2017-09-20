@@ -243,30 +243,39 @@ postDecrease allowance = 40
       
 ```
 
-###  Holdme #11 should mint a given amount of tokens to a given address
-* [X] mainAccountBalanceBeforeMint should be equal to INITAL_SUPPLY = 300000000
-* [X] Mint 100 tokens
-* [X] mainAccountBalanceBeforeMint should be equal to INITAL_SUPPLY + MINT_AMOUNT = 300000100
-* [X] totalSupplyAfterMint should be equal to INITAL_SUPPLY + MINT_AMOUNT = 300000100
+###  Holdme #11 should issue a given amount of tokens to a given address
+* [X] mainAccountBalanceBeforeIssue should be equal to INITAL_SUPPLY = 300000000
+* [X] Issue 100 tokens
+* [X] mainAccountBalanceAfterIssue should be equal to INITAL_SUPPLY + MINT_AMOUNT = 300000100
+* [X] totalSupplyAfterIssue should be equal to INITAL_SUPPLY + MINT_AMOUNT = 300000100
 
 **Console Output:**
 ```
 
 Holdme #11 BEGIN==========================================================
-mainAccountBalanceBeforeMint = 300000000 should equal to INITAL_SUPPLY = 300000000
-mainAccountBalanceAfterMint = 300000100 should equal to INITAL_SUPPLY + MINT_AMOUNT = 300000100
-totalSupplyAfterMint = 300000100 should equal to INITAL_SUPPLY + MINT_AMOUNT = 300000100
-    ✓ Holdme #11 should mint a given amount of tokens to a given address (128ms)
+mainAccountBalanceBeforeIssue = 300000000 should equal to INITAL_SUPPLY = 300000000
+mainAccountBalanceAfterIssue = 300000100 should equal to INITAL_SUPPLY + ISSUE_AMOUNT = 300000100
+totalSupplyAfterIssue = 300000000 should equal to INITAL_SUPPLY + ISSUE_AMOUNT = 300000100
+    ✓ Holdme #11 should issue a given amount of tokens to a given address (134ms)
 
 
 ```
 
-### Holdme #12
-* [X] Pre approved amount should be 0
-
+### Holdme #12 should fail to issue after call to finishIssuance
+* [X] mainAccountBalanceBeforeIssue should be equal to 300000000
+* [X] issuanceFinished = true
+* [X] Issue a new token 
+* [X] Issuance a new token should fail
+* [X] receivingAccountBalanceAfterIssue should be equal to 0
 
 **Console Output:**
 ```
+
+Holdme #12 BEGIN==========================================================
+mainAccountBalanceBeforeIssue = 300000000 should equal to INITAL_SUPPLY = 300000000
+issuanceFinished = true
+receivingAccountBalanceAfterIssue = 0 should equal to  0
+    ✓ Holdme #12 should fail to issue after call to finishIssuance (174ms)
 
 ```
 
@@ -282,26 +291,6 @@ totalSupplyAfterMint = 300000100 should equal to INITAL_SUPPLY + MINT_AMOUNT = 3
 * [X] Company Share of Advisor should be equal to 24000000
 * [X] StartTimeSale not in progress should be equal to 100 days from now
 * [X] getEndTimeSale not in progress should be equal StartTimeSale + 60 days
-
-**Console Output:**
-```
-
-HoldmeTokenSale #1. BEGIN==========================================================
-getBeneficiary = 0x1dabc283db78a4e94cace54ed0858f606045962e
-getAdvisor = 0xe377c8b3b3a5427e5e9aba8c46bcd3f506ed9d38
-getDevone = 0xe6eaac5bc3bee75d5f06cca9674407861e5d8743
-getDevtwo = 0xb42b8f0aac75c7231af3d9403ccfbe667892d2cf
-getDevtree = 0x2d0156a30af6856cb7d3cf5bb10061e780589751
-getShareAdvisor = 2.4e+25
-getShareDev = 9e+24
-getStartTimeSale not in progress= 1513949823
-getEndTimeSale not in progress= 1519133823
-    ✓ HoldmeTokenSale #1 should return the correct information after construction (246ms)
-
-```
-
-
-###  HoldmeTokenSale and HoldmeToken #2 should return the correct information after setToken
 * [X] totalSupply should be equal to 300000000
 * [X] name should be equal to "Holdme company token"
 * [X] symbol should be should be equal to "HME"
@@ -311,13 +300,21 @@ getEndTimeSale not in progress= 1519133823
 * [X] The Token balance of advisor should be 0
 * [X] The Token balance of devone should be 0
 * [X] The Token balance of devtwo should be 0
-* [X] The Token balance of devtree should be 0
-
+* [X] The Token balance of devtree should be 0x0
 
 **Console Output:**
 ```
 
-HoldmeTokenSale #2. BEGIN==========================================================
+HoldmeTokenSale #1. BEGIN==========================================================
+getBeneficiary = 0xfc393e198aac7327b2e2c67494d1fc07c5632b3d
+getAdvisor = 0x52322cd3fcd5d141e7ca5c49f5a895b5779e4241
+getDevone = 0x171854d486bf0cb96669f7ad5514648c5fb968a5
+getDevtwo = 0x9a03f20aaa03028a3fdf188a54fe121ba1d6d3a4
+getDevtree = 0xd14bf9d79b9aa2460b275d17c01649cf46fcdc5c
+getShareAdvisor = 2.4e+25
+getShareDev = 9e+24
+getStartTimeSale not in progress= 1514536066
+getEndTimeSale not in progress= 1519720066
 The totalSupply of the created Token should equal to 300000000
 The Token name should be equal to Holdme company token
 The Token symbol should be equal to HME
@@ -328,25 +325,26 @@ The token balance of the advisor  should be equal to 0
 The token balance of the devone  should be equal to 0
 The token balance of the devtwo  should be equal to 0
 The token balance of the devtree  should be equal to 0
-    ✓ HoldmeTokenSale #2 should return the correct information after setToken (303ms)
-
+    ✓ HoldmeTokenSale #1 should return the correct information after construction (465ms)
 
 ```
 
-### HoldmeTokenSale #3 should start the token sale
+
+
+### HoldmeTokenSale #2 should start the token sale
 * [X] StartTimeSale in progress should be equal to today
 * [X] getEndTimeSale in progress should be equal today + 60
 
 **Console Output:**
 ```
 
-HoldmeTokenSale #3. BEGIN==========================================================
+HoldmeTokenSale #2. BEGIN==========================================================
 getStartTimeSale in progress= 1505266917
 getEndTimeSale  in progress= 1510450917
-    ✓ HoldmeTokenSale #3 should start the token sale (109ms)
+    ✓ HoldmeTokenSale #2 should start the token sale (109ms)
 
 ```
-### HoldmeTokenSale #4 should stop the token sale and restart it again
+### HoldmeTokenSale #3 should stop the token sale and restart it again
 * [X] StartTimeSale in progress should be equal to today
 * [X] getEndTimeSale in progress should be equal today + 60
 * [X] saleStoppedBefore should be equal to false
@@ -357,12 +355,38 @@ getEndTimeSale  in progress= 1510450917
 **Console Output:**
 ```
 
-HoldmeTokenSale #4. BEGIN==========================================================
+HoldmeTokenSale #3. BEGIN==========================================================
 getStartTimeSale in progress = 1505270075
 getEndTimeSale  in progress = 1510454075
 saleStoppedBeforeStopped = false
 saleStoppedAfterStopped = true
 saleStoppedAfterRestart = false
-    ✓ HoldmeTokenSale #4 should stop the token sale and restart it again (263ms)
+    ✓ HoldmeTokenSale #3 should stop the token sale and restart it again (263ms)
+
+```
+
+### HoldmeTokenSale #4 should able to contribute ETH after start the token sale
+* [X] StartTimeSale in progress should be equal to today
+* [X] getEndTimeSale in progress should be equal today + 60
+* [X] ethContributerBalanceBeforeInvestment should be equal to 100 eth
+* [X] ethBenificiaryBalanceBeneficiaryBeforeInvestment should be equal to 100 eth
+* [X] Contributer contribute 50 ether
+* [X] totalEtherContributed should be equal to 50 ether
+* [X] totalTokenIssued  should be equal to 5000 tokens
+
+**Console Output:**
+```
+
+HoldmeTokenSale #4. BEGIN==========================================================
+getStartTimeSale in progress = 1505852866
+getEndTimeSale  in progress = 1511036866
+ethContributerBalanceBeforeInvestment = 100000000000000000000
+ethBenificiaryBalanceBeneficiaryBeforeInvestment = 100000000000000000000
+totalEtherContributed = 50
+totalTokenIssued = 5000
+contributerTokenBalanceAfterInvestments = 5000
+ethContributerBalanceAfterInvestment = 100000000000000000000
+ethBenificiaryBalanceBeneficiaryAfterInvestment = 100000000000000000000
+    ✓ HoldmeTokenSale #4 should able to contribute ETH after start the token sale (707ms)
 
 ```

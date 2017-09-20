@@ -12,7 +12,7 @@ contract('Holdme', function(accounts) {
  	let SPENDER_ACCOUNT = accounts[2]
 
  	const INITAL_SUPPLY = 300000000;
- 	const MINT_AMOUNT = 100;
+ 	const ISSUE_AMOUNT = 100;
  	const TRANSFER_AMOUNT = 10000;
  	const APPROVE_AMOUNT = 1000;
 
@@ -333,50 +333,48 @@ contract('Holdme', function(accounts) {
 	    })
 	 });
 
-  	it('Holdme #11 should mint a given amount of tokens to a given address', async function() {
+  	it('Holdme #11 should issue a given amount of tokens to a given address', async function() {
         console.log("Holdme #11 BEGIN==========================================================");
 
-        let mainAccountBalanceBeforeMint = await token.balanceOf(MAIN_ACCOUNT);
-        console.log("mainAccountBalanceBeforeMint = " +mainAccountBalanceBeforeMint +" should equal to INITAL_SUPPLY = " +INITAL_SUPPLY);
-        assert.equal(mainAccountBalanceBeforeMint, INITAL_SUPPLY);
+        let mainAccountBalanceBeforeIssue = await token.balanceOf(MAIN_ACCOUNT);
+        console.log("mainAccountBalanceBeforeIssue = " +mainAccountBalanceBeforeIssue +" should equal to INITAL_SUPPLY = " +INITAL_SUPPLY);
+        assert.equal(mainAccountBalanceBeforeIssue, INITAL_SUPPLY);
 
-        const result = await token.mint(MAIN_ACCOUNT, MINT_AMOUNT);
+        const result = await token.issue(MAIN_ACCOUNT, ISSUE_AMOUNT);
 
-        const balanceAfter = INITAL_SUPPLY + MINT_AMOUNT;
+        const balanceAfter = INITAL_SUPPLY + ISSUE_AMOUNT;
 
-        let mainAccountBalanceAfterMint = await token.balanceOf(MAIN_ACCOUNT);
-        console.log("mainAccountBalanceAfterMint = " +mainAccountBalanceAfterMint +" should equal to INITAL_SUPPLY + MINT_AMOUNT = " +balanceAfter);
-        assert.equal(mainAccountBalanceAfterMint, balanceAfter);
+        let mainAccountBalanceAfterIssue = await token.balanceOf(MAIN_ACCOUNT);
+        console.log("mainAccountBalanceAfterIssue = " +mainAccountBalanceAfterIssue +" should equal to INITAL_SUPPLY + ISSUE_AMOUNT = " +balanceAfter);
+        assert.equal(mainAccountBalanceAfterIssue, balanceAfter);
 
     
-        let totalSupplyAfterMint = await token.totalSupply();
-        console.log("totalSupplyAfterMint = " +totalSupplyAfterMint +" should equal to INITAL_SUPPLY + MINT_AMOUNT = " +balanceAfter);
-        assert(totalSupplyAfterMint, balanceAfter);
+        let totalSupplyAfterIssue = await token.totalSupply();
+        console.log("totalSupplyAfterIssue = " +totalSupplyAfterIssue +" should equal to INITAL_SUPPLY + ISSUE_AMOUNT = " +balanceAfter);
+        assert(totalSupplyAfterIssue, balanceAfter);
     });
 
-    it('Holdme #12 should fail to mint after call to finishMinting', async function () {
+    it('Holdme #12 should fail to issue after call to finishIssuance', async function () {
         console.log("Holdme #12 BEGIN==========================================================");
 
-        let mainAccountBalanceBeforeMint = await token.balanceOf(MAIN_ACCOUNT);
-        console.log("mainAccountBalanceBeforeMint = " +mainAccountBalanceBeforeMint +" should equal to INITAL_SUPPLY = " +INITAL_SUPPLY);
-        assert.equal(mainAccountBalanceBeforeMint, INITAL_SUPPLY);
+        let mainAccountBalanceBeforeIssue = await token.balanceOf(MAIN_ACCOUNT);
+        console.log("mainAccountBalanceBeforeIssue = " +mainAccountBalanceBeforeIssue +" should equal to INITAL_SUPPLY = " +INITAL_SUPPLY);
+        assert.equal(mainAccountBalanceBeforeIssue, INITAL_SUPPLY);
 
-        await token.finishMinting();
-        var mintingFinished = await token.mintingFinished();
-        console.log("mintingFinished = " +mintingFinished);
-        assert.equal(mintingFinished, true);
+        await token.finishIssuance();
+        var issuanceFinished = await token.issuanceFinished();
+        console.log("issuanceFinished = " +issuanceFinished);
+        assert.equal(issuanceFinished, true);
         try {
-        	await token.mint(RECEIVING_ACCOUNT, MINT_AMOUNT);
+        	await token.issue(RECEIVING_ACCOUNT, ISSUE_AMOUNT);
         } catch(error) {
-	     	let receivingAccountBalanceAfterMint = await token.balanceOf(RECEIVING_ACCOUNT);
-        	console.log("receivingAccountBalanceAfterMint = " +receivingAccountBalanceAfterMint +" should equal to  0=");
-        	assert.equal(mainAccountBalanceAfterMint, INITAL_SUPPLY);
+	     	let receivingAccountBalanceAfterIssue = await token.balanceOf(RECEIVING_ACCOUNT);
+        	console.log("receivingAccountBalanceAfterIssue = " +receivingAccountBalanceAfterIssue +" should equal to  0");
+        	assert.equal(receivingAccountBalanceAfterIssue, 0);
 			return assertJump(error);
 	    }
 	    assert.fail('should have thrown before');
-
-
-        
+ 
     });
 
 });

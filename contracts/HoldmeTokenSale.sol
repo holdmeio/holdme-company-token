@@ -10,25 +10,21 @@ pragma solidity ^0.4.15;
  *
  */
 
-import './Holdme.sol/';
+import './Holdme.sol';
+import './TokenController.sol';
 import '../installed_contracts/ERC23/contracts/Utils.sol/';
-import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol';
-import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/lifecycle/Pausable.sol';
-//import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/Token/TokenTimelock.sol';
+import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/lifecycle/Pausable.sol';;
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
-//import './TokenVault.sol';
-//import './PricingScheme.sol';
 
-contract HoldmeTokenSale is Ownable, Utils, Pausable {
+contract HoldmeTokenSale is TokenController, Pausable {
     using SafeMath for uint256;
 
     uint256 public constant TOKEN_PRICE_N = 1;                  // initial price in wei (numerator)
-    uint256 public constant TOKEN_PRICE_D = 100;                // initial price in wei (denominator)
-    uint256 public constant MAX_GAS_PRICE = 50000000000 wei;    // maximum gas price for contribution transactions
+    uint256 public constant TOKEN_PRICE_D = 3030;                // initial price in wei (denominator)
+    uint256 public constant MAX_GAS_PRICE = 500000000000 wei;    // maximum gas price for contribution transactions
 
     Holdme public token;        // The token
-    //TokenVault public tokenVault;                 // Token Vault where addresses are stored before tokens are released
-    //PricingScheme public pricingScheme;
+
 
     string public version = "0.1";
 
@@ -63,18 +59,10 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
     event Contribution(address indexed _contributor, uint256 _amount, uint256 _return);
     event Finalized();
 
-    function HoldmeTokenSale (
-        address _centralAdmin,
-        uint256 _startTime, 
-        uint256 _endTime, 
-        address _beneficiary, 
-        address _devone, 
-        address _devtwo, 
-        address _devthree, 
-        address _advisor,
-        uint256 _shareDev,
-        uint256 _shareAdvisor
-    ) { 
+    function HoldmeTokenSale (Holdme _token, address _centralAdmin, uint256 _startTime, uint256 _endTime, address _beneficiary, address _devone, address _devtwo, address _devthree, address _advisor)
+        TokenController(_token)
+    { 
+
         if (_centralAdmin != 0) {
           owner = _centralAdmin;
         } else {
@@ -87,8 +75,7 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
         devtwo = _devtwo;
         devtree = _devthree;
         advisor = _advisor;
-        shareDev = _shareDev;
-        shareAdvisor = _shareAdvisor;
+        token = token;
     }
 
     // fallback when investor transfering Ether to the crowdsale contract without calling any functions
@@ -115,16 +102,6 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
     }
 
 
-    function setToken(address _token) 
-        public 
-        validAddress(_token)
-        onlyOwner
-        returns (bool success)
-    {
-        token = Holdme(_token);
-        return true;
-    }
-
     function setStartTime(uint256 _newStartTime) 
         public 
         greaterThanZero(_newStartTime)
@@ -141,41 +118,10 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
         onlyOwner
         returns (bool success) 
     {
-        require(_newEndTime >= startTime);
+        //require(_newEndTime >= startTime);
         endTime = _newEndTime;
         return true;
     }
-    /*
-    function setTokenVault(address _tokenVault) 
-        public
-        validAddress(_tokenVault)
-        onlyOwner
-    {
-        tokenVault = TokenVault(_tokenVault);
-    }
-    */
-/*
-    function setPricingScheme(address _pricingScheme) 
-        public
-        validAddress(_pricingScheme) 
-        onlyOwner
-    {
-        pricingScheme = PricingScheme(_pricingScheme);
-    }*/
-
-
-    /**
-        @dev computes the number of tokens that should be issued for a given contribution
-
-        @param _contribution    contribution amount
-
-        @return computed number of tokens
-    */
-    function computeReturn(uint256 _contribution) public constant returns (uint256) {
-        return (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N);
-    }
-
-  
 
     /**
         @dev ETH contribution
@@ -192,9 +138,6 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
         greaterThanZero(_amount)
         returns (uint256 amount)
     {
-        require(_contributer != 0x0 &&
-                _amount > 0);
-
         uint256 tokenAmount = computeReturn(_amount);
         processContribution(_contributer, _amount, tokenAmount);
         return tokenAmount;
@@ -215,9 +158,6 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
         greaterThanZero(_amount)
         returns (uint256 amount)
     {
-        require(_contributer != 0x0 &&
-                _amount > 0);
-
         uint256 tokenAmount = computeReturn(_amount.mul(_btcToEthPrice));
         processContribution(_contributer, _amount, tokenAmount);
         return tokenAmount;
@@ -231,16 +171,12 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
     */
     function processContribution(address _contributer, uint256 _ethAmount, uint256 _tokenAmount) 
         private
-        onlyOwner
-        tokenMaxCapNotReached()
+        tokenMaxCapNotReached
         validGasPrice
     {
-        assert(beneficiary.send(_ethAmount)); // transfer the ether to the beneficiary account
         totalEtherContributed = totalEtherContributed.add(_ethAmount);// update the total contribution amount
-
-        //tokenVault.setInvestor(_contributer, _tokenAmount);
         totalTokenIssued = totalTokenIssued.add(_tokenAmount);
-
+        token.issue(_contributer, _tokenAmount);
         Contribution(_contributer, _ethAmount, _tokenAmount);
     }
 
@@ -265,6 +201,26 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
     }
 
     /**
+        @dev computes the number of tokens that should be issued for a given contribution
+
+        @param _contribution    contribution amount
+
+        @return computed number of tokens
+    */
+    function computeReturn(uint256 _contribution) internal constant returns (uint256) {
+        uint256 amount;
+        uint256 multiplier = 10 ** decimals;
+        uint256 decimals = token.decimals();
+
+        if (decimals > 0) {
+            amount = (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N).mul(multiplier);
+        } else {
+            amount = (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N);
+        }
+        return amount;
+    }
+
+    /**
     * @dev Can be overriden to add finalization logic. The overriding function
     * should call super.finalization() to ensure the chain of finalization is
     * executed entirely.
@@ -277,10 +233,15 @@ contract HoldmeTokenSale is Ownable, Utils, Pausable {
         Sending Company shares for the Team
         Only executed in constructor
     */
-    function sendShares() internal onlyOwner{
-        token.transfer(devone, shareDev);               
-        token.transfer(devtwo, shareDev);               
-        token.transfer(devtree, shareDev);             
-        token.transfer(advisor, shareAdvisor);        
+    function sendShares() internal {
+        //uint256 beneficiaryToken = totalTokenIssued * 51 / 100;
+        //uint256 advisorToken = totalTokenIssued * 8 / 100;
+        //uint256 devOneToken = token.totalSupply() * 3 / 100;
+        //uint256 devTwoToken = token.totalSupply() * 5 / 100;
+        //uint256 devTreeToken = token.totalSupply() * 1 / 100;
+        //token.issue(beneficiary, beneficiaryToken);
+        //token.issue(advisor, advisorToken);
+        //token.issue(devone, devOneToken);
+        //token.issue(devtree, devTreeToken);    
     }
 }
