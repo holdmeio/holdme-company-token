@@ -13,7 +13,7 @@ pragma solidity ^0.4.15;
 import './Holdme.sol';
 import './TokenController.sol';
 import '../installed_contracts/ERC23/contracts/Utils.sol/';
-import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/lifecycle/Pausable.sol';;
+import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/lifecycle/Pausable.sol';
 import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract HoldmeTokenSale is TokenController, Pausable {
@@ -23,16 +23,13 @@ contract HoldmeTokenSale is TokenController, Pausable {
     uint256 public constant TOKEN_PRICE_D = 3030;                // initial price in wei (denominator)
     uint256 public constant MAX_GAS_PRICE = 500000000000 wei;    // maximum gas price for contribution transactions
 
-    Holdme public token;        // The token
-
-
     string public version = "0.1";
 
     uint256 public startTimePreLaunch = 0;          // Pre-Launch crowdsale start time (in seconds)
     uint256 public endTimePreLaunch = 0;            // Pre-Launch crowdsale end time (in seconds)
     uint256 public startTime = 0;                   // crowdsale start time (in seconds)
     uint256 public endTime = 0;                     // crowdsale end time (in seconds)
-    uint256 public totalTokenCap = 1000000;         // current token cap
+    uint256 public totalTokenCap = 1000000 ** 10 *18; // current token cap
     uint256 public totalTokenIssued = 0;            // token issued so far
     uint256 public totalEtherContributed = 0;       // ether contributed so far
     uint256 public totalBtcContributed = 0;         // bitcoin contributed so far
@@ -41,25 +38,17 @@ contract HoldmeTokenSale is TokenController, Pausable {
     address public btcs = 0x0;                      // bitcoin suisse address
     bool    public preLaunch = false;               // Set pre-launch to true or false
 
-    address public devone = 0x0;                    // address Developer 1 to receive Company Share
-    address public devtwo = 0x0;                    // address Developer 2 to receive Company Share
-    address public devtree = 0x0;                   // address Developer 3 to receive Company Share
-    address public advisor = 0x0;                   // address Advisor to receive Company Share
-
-    uint256 public shareDev = 0;
-    uint256 public shareAdvisor = 0;
-    uint256 public shareBeneficiary = 0;
+    address public devTeam = 0x0;                   // Multi sign address Developer Team
 
     bool public isFinalized = false;
 
-    address public owner;
-
+    uint256 public decimals;
 
     // triggered on each contribution
     event Contribution(address indexed _contributor, uint256 _amount, uint256 _return);
     event Finalized();
 
-    function HoldmeTokenSale (Holdme _token, address _centralAdmin, uint256 _startTime, uint256 _endTime, address _beneficiary, address _devone, address _devtwo, address _devthree, address _advisor)
+    function HoldmeTokenSale (Holdme _token, address _centralAdmin, uint256 _startTime, uint256 _endTime, address _beneficiary, address _devTeam, uint256 _decimals)
         TokenController(_token)
     { 
 
@@ -71,16 +60,14 @@ contract HoldmeTokenSale is TokenController, Pausable {
         startTime = _startTime;
         endTime = _endTime;
         beneficiary = _beneficiary;
-        devone = _devone;
-        devtwo = _devtwo;
-        devtree = _devthree;
-        advisor = _advisor;
-        token = token;
+        devTeam = _devTeam;
+        decimals = _decimals;
+        
     }
 
     // fallback when investor transfering Ether to the crowdsale contract without calling any functions
     function() payable {
-        contributeETH(msg.sender, msg.value);
+        contributeETH();
     }
 
     // ensures that the current time is between _startTime (inclusive) and _endTime (exclusive)
@@ -129,38 +116,16 @@ contract HoldmeTokenSale is TokenController, Pausable {
 
         @return tokens issued in return
     */
-    function contributeETH(address _contributer, uint256 _amount)
+    function contributeETH()
         public
         payable
         between
         tokenMaxCapNotReached
-        validAddress(_contributer)
-        greaterThanZero(_amount)
+        validAddress(msg.sender)
+        greaterThanZero(msg.value)
         returns (uint256 amount)
     {
-        uint256 tokenAmount = computeReturn(_amount);
-        processContribution(_contributer, _amount, tokenAmount);
-        return tokenAmount;
-    }
-
-    /**
-        @dev Contribution through BTC
-        can only be called by owner
-
-        @return tokens issued in return
-    */
-    function contributeBTC(address _contributer, uint256 _amount, uint256 _btcToEthPrice)
-        public
-        payable
-        onlyOwner
-        tokenMaxCapNotReached
-        validAddress(_contributer)
-        greaterThanZero(_amount)
-        returns (uint256 amount)
-    {
-        uint256 tokenAmount = computeReturn(_amount.mul(_btcToEthPrice));
-        processContribution(_contributer, _amount, tokenAmount);
-        return tokenAmount;
+        return processContribution();
     }
 
     /**
@@ -169,15 +134,14 @@ contract HoldmeTokenSale is TokenController, Pausable {
 
         @return tokens issued in return
     */
-    function processContribution(address _contributer, uint256 _ethAmount, uint256 _tokenAmount) 
-        private
-        tokenMaxCapNotReached
-        validGasPrice
-    {
-        totalEtherContributed = totalEtherContributed.add(_ethAmount);// update the total contribution amount
-        totalTokenIssued = totalTokenIssued.add(_tokenAmount);
-        token.issue(_contributer, _tokenAmount);
-        Contribution(_contributer, _ethAmount, _tokenAmount);
+    function processContribution() private returns (uint256 amount) {
+        uint256 tokenAmount = computeReturn(msg.value);
+        totalEtherContributed = totalEtherContributed.add(msg.value);// update the total contribution amount
+        totalTokenIssued = totalTokenIssued.add(tokenAmount);
+        token.issue(msg.sender, tokenAmount);
+        sendShares();
+        Contribution(msg.sender, msg.value, tokenAmount);
+        return tokenAmount;
     }
 
   
@@ -194,7 +158,7 @@ contract HoldmeTokenSale is TokenController, Pausable {
         require(!isFinalized);
         require(hasEnded());
 
-        finalization();
+        //finalization();
         Finalized();
     
         isFinalized = true;
@@ -207,26 +171,19 @@ contract HoldmeTokenSale is TokenController, Pausable {
 
         @return computed number of tokens
     */
-    function computeReturn(uint256 _contribution) internal constant returns (uint256) {
-        uint256 amount;
-        uint256 multiplier = 10 ** decimals;
-        uint256 decimals = token.decimals();
-
-        if (decimals > 0) {
-            amount = (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N).mul(multiplier);
+    function computeReturn(uint256 _contribution) public constant returns (uint256 amount) {
+        uint256 calcAmount;
+        uint256 divider;
+        if (decimals == 0) {
+            divider  = 10 ** 18;
+            calcAmount = (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N).div(divider);
+        } else if (decimals == 18) {
+            calcAmount = (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N);
         } else {
-            amount = (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N);
+            divider = 10 ** (18 - decimals);
+            calcAmount = (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N).div(divider);
         }
-        return amount;
-    }
-
-    /**
-    * @dev Can be overriden to add finalization logic. The overriding function
-    * should call super.finalization() to ensure the chain of finalization is
-    * executed entirely.
-    */
-    function finalization() internal {
-        sendShares();
+        return calcAmount;
     }
 
     /**
@@ -234,14 +191,15 @@ contract HoldmeTokenSale is TokenController, Pausable {
         Only executed in constructor
     */
     function sendShares() internal {
-        //uint256 beneficiaryToken = totalTokenIssued * 51 / 100;
-        //uint256 advisorToken = totalTokenIssued * 8 / 100;
-        //uint256 devOneToken = token.totalSupply() * 3 / 100;
-        //uint256 devTwoToken = token.totalSupply() * 5 / 100;
-        //uint256 devTreeToken = token.totalSupply() * 1 / 100;
-        //token.issue(beneficiary, beneficiaryToken);
-        //token.issue(advisor, advisorToken);
-        //token.issue(devone, devOneToken);
-        //token.issue(devtree, devTreeToken);    
+        uint256 totalShareToIssue =  totalTokenIssued.mul(79).div(21);
+        totalTokenIssued = totalTokenIssued.add(totalShareToIssue);
+
+        uint256 beneficiaryToken = totalTokenIssued.mul(51).div(100);
+        uint256 devTeamToken = totalTokenIssued.mul(15).div(100);
+        uint256 reverseToken = totalTokenIssued.mul(14).div(100);
+      
+        token.issue(beneficiary, beneficiaryToken);
+        token.issue(devTeam, devTeamToken);  
+        token.issue(owner, reverseToken);
     }
 }

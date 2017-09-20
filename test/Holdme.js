@@ -376,5 +376,6 @@ contract('Holdme', function(accounts) {
 	    assert.fail('should have thrown before');
  
     });
+    
 
 });

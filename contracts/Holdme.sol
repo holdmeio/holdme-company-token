@@ -52,7 +52,10 @@ contract Holdme is Ownable, UpgradeableStandard23Token {
     * @param _amount The amount of tokens to issue.
     * @return A boolean that indicates if the operation was successful.
     */
-    function issue(address _to, uint256 _amount) public onlyOwner canIssue returns (bool success) 
+    function issue(address _to, uint256 _amount) public 
+        onlyOwner 
+        canIssue 
+        returns (bool success) {
         totalSupply = totalSupply.add(_amount);
         balances[_to] = balances[_to].add(_amount);
         Issuance(_amount);
