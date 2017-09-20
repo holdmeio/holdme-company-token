@@ -1,0 +1,17 @@
+build/contracts/ERC23Receiver.json
+build/contracts/Basic23Token.json
+build/contracts/BasicToken.json
+build/contracts/ERC20.json
+build/contracts/ERC20Basic.json
+build/contracts/ERC23.json
+build/contracts/ERC23Basic.json
+build/contracts/HoldmeTokenSale.json
+build/contracts/Ownable.json
+build/contracts/PricingScheme.json
+build/contracts/SafeMath.json
+build/contracts/SafeMathLib.json
+build/contracts/Standard23Token.json
+build/contracts/StandardToken.json
+build/contracts/TokenVault.json
+build/contracts/UpgradeableStandard23Token.json
+build/contracts/Utils.json
