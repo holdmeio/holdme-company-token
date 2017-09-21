@@ -19,30 +19,24 @@ import '../installed_contracts/ERC23/installed_contracts/zeppelin-solidity/contr
 contract HoldmeTokenSale is TokenController, Pausable {
     using SafeMath for uint256;
 
+    uint256 public decimals;                                    // To be able to calculate the token amount
     uint256 public constant TOKEN_PRICE_N = 1;                  // initial price in wei (numerator)
-    uint256 public constant TOKEN_PRICE_D = 3030;                // initial price in wei (denominator)
-    uint256 public constant MAX_GAS_PRICE = 500000000000 wei;    // maximum gas price for contribution transactions
+    uint256 public constant TOKEN_PRICE_D = 3030;               // initial price in wei (denominator)
+    uint256 public constant MAX_GAS_PRICE = 60000000000 wei;    // maximum gas price for contribution transactions
 
-    string public version = "0.1";
+    string public version = "1.0";
 
-    uint256 public startTimePreLaunch = 0;          // Pre-Launch crowdsale start time (in seconds)
-    uint256 public endTimePreLaunch = 0;            // Pre-Launch crowdsale end time (in seconds)
-    uint256 public startTime = 0;                   // crowdsale start time (in seconds)
-    uint256 public endTime = 0;                     // crowdsale end time (in seconds)
-    uint256 public totalTokenCap = 1000000 ** 10 *18; // current token cap
-    uint256 public totalTokenIssued = 0;            // token issued so far
-    uint256 public totalEtherContributed = 0;       // ether contributed so far
-    uint256 public totalBtcContributed = 0;         // bitcoin contributed so far
-    bytes32 public realEtherCapHash;                // ensures that the real cap is predefined on deployment and cannot be changed later
-    address public beneficiary = 0x0;               // address to receive all ether contributions
-    address public btcs = 0x0;                      // bitcoin suisse address
-    bool    public preLaunch = false;               // Set pre-launch to true or false
+    uint256 public startTime = 1506729540;                      // crowdsale start time (in seconds) Presale starts 2017/09/29 23:59:00
+    uint256 public endTime = 1507420740;                        // crowdsale end time (in seconds) Presale ends 2017/10/07 23:59:00
+    uint256 public totalTokenCap = 300000000;                   // current token cap
+    uint256 public totalTokenIssued = 0;                        // token issued so far
+    uint256 public totalEtherContributed = 0;                   // ether contributed so far
+    address public beneficiary = 0x0;                           // address to receive all ether contributions
+    address public devTeam = 0x0;                               // Multi sign address Developer Team
+    bool    public preLaunch = false;                           // Set pre-launch to true or false
+    bool    public isFinalized = false;                         // When Pre-Sale or sale is end, isFinalized will set to true
 
-    address public devTeam = 0x0;                   // Multi sign address Developer Team
-
-    bool public isFinalized = false;
-
-    uint256 public decimals;
+ 
 
 
     // triggered on each contribution
@@ -84,27 +78,53 @@ contract HoldmeTokenSale is TokenController, Pausable {
         _;
     }
 
-    // verifies that the gas price is lower than 50 gwei
+    // verifies that the gas price is lower than 60 gwei
     modifier validGasPrice() {
         assert(tx.gasprice <= MAX_GAS_PRICE);
         _;
     }
+    
+     /**
+    *   @dev startPresale. Start the Pre-sale
+    *      
+    *   @return A boolean that indicates if the operation was successful.
+    */
+    function startPresale() onlyOwner returns (bool success) {
+        require(!preLaunch);
+        preLaunch = true;
+        return true;
+    }
 
-
+    /**
+    *   @dev setStartTime change the starttime.
+    *        for example to be able to start ICO after pre-sale
+    *
+    *   @param _newStartTime the new start time to be set
+    *
+    *   @return A boolean that indicates if the operation was successful.
+    */
     function setStartTime(uint256 _newStartTime) 
         public 
+        onlyOwner
         greaterThanZero(_newStartTime)
-        onlyOwner 
         returns (bool success) 
     {
         startTime = _newStartTime;
         return true;
     }
 
+    /**
+    *   @dev setEndTime change the end time .
+    *        for example to be able to start ICO after pre-sale
+    *
+    *   @param _newEndTime the new end time to be set
+    *
+    *   @return A boolean that indicates if the operation was successful.
+    */
     function setEndTime(uint256 _newEndTime) 
         public 
-        greaterThanZero(_newEndTime)
         onlyOwner
+        greaterThanZero(_newEndTime)
         returns (bool success) 
     {
         //require(_newEndTime >= startTime);
@@ -113,10 +133,10 @@ contract HoldmeTokenSale is TokenController, Pausable {
     }
 
     /**
-        @dev ETH contribution
-        can only be called during the crowdsale
-
-        @return tokens issued in return
+    *   @dev ETH contribution
+    *   can only be called during the crowdsale
+    *
+    *   @return tokens issued in return
     */
     function contributeETH()
         public
@@ -127,17 +147,20 @@ contract HoldmeTokenSale is TokenController, Pausable {
         greaterThanZero(msg.value)
         returns (uint256 amount)
     {
+        require(!isFinalized);
         uint256 realEther = 1;
         return processContribution(msg.sender, msg.value, realEther);
     }
 
 
     /**
-        @dev COINS contribution
-        can only be called during the crowdsale
-        only by whitelisted address
-
-        @return tokens issued in return
+    *    @dev COINS contribution
+    *    can only be called only by whitelisted address
+    *
+    *   @param _contributor the address of the contributor
+    *   @param _amount the amount of ether in wei of the contributor
+    *
+    *    @return tokens issued in return
     */
     function contributeCoins(address _contributor, uint256 _amount)
         public
@@ -146,26 +169,9 @@ contract HoldmeTokenSale is TokenController, Pausable {
         greaterThanZero(_amount)
         returns (uint256 amount)
     {
+        require(!isFinalized);
         uint256 realEther = 0;
         return processContribution(_contributor, _amount, realEther);
-    }
-
-    /**
-        @dev handles contribution logic
-        note that the Contribution event is triggered using the sender as the contributor, regardless of the actual contributor
-
-        @return tokens issued in return
-    */
-    function processContribution(address _contributor, uint256 _amount, uint256 _realEther) private returns (uint256 amount) {
-        uint256 tokenAmount = computeReturn(_amount);
-        if (_realEther == 1 && msg.value > 0) {
-            totalEtherContributed = totalEtherContributed.add(msg.value);// update the total contribution amount, only update when real ether has been sent 
-        }
-        totalTokenIssued = totalTokenIssued.add(tokenAmount);
-        token.issue(_contributor, tokenAmount);
-        sendShares();
-        Contribution(_contributor, _amount, tokenAmount);
-        return tokenAmount;
     }
 
   
@@ -197,22 +203,22 @@ contract HoldmeTokenSale is TokenController, Pausable {
     */
     function computeReturn(uint256 _contribution) public constant returns (uint256 amount) {
         uint256 calcAmount;
-        uint256 divider;
-        if (decimals == 0) {
-            divider  = 10 ** 18;
-            calcAmount = (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N).div(divider);
-        } else if (decimals == 18) {
-            calcAmount = (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N);
+        uint256 tokenPrice;
+
+        if (preLaunch) {
+            tokenPrice = TOKEN_PRICE_D.mul(35).div(100); //35% discount on Pre-sale
         } else {
-            divider = 10 ** (18 - decimals);
-            calcAmount = (_contribution.mul(TOKEN_PRICE_D)).div(TOKEN_PRICE_N).div(divider);
+            tokenPrice = TOKEN_PRICE_D;
         }
+
+        calcAmount = (_contribution.mul(tokenPrice)).div(TOKEN_PRICE_N);
+        calcAmount = removeDecimals(calcAmount);
+
         return calcAmount;
     }
 
     /**
         Sending Company shares for the Team
-        Only executed in constructor
     */
     function sendShares() internal {
         uint256 totalShareToIssue =  totalTokenIssued.mul(79).div(21);
@@ -225,5 +231,40 @@ contract HoldmeTokenSale is TokenController, Pausable {
         token.issue(beneficiary, beneficiaryToken);
         token.issue(devTeam, devTeamToken);  
         token.issue(owner, reverseToken);
+    }
+
+    /**
+        @dev handles contribution logic
+        note that the Contribution event is triggered using the sender as the contributor, regardless of the actual contributor
+
+        @return tokens issued in return
+    */
+    function processContribution(address _contributor, uint256 _amount, uint256 _realEther) private returns (uint256 amount) {
+        uint256 tokenAmount = computeReturn(_amount);
+        if (_realEther == 1 && msg.value > 0) {
+            totalEtherContributed = totalEtherContributed.add(msg.value);// update the total contribution amount, only update when real ether has been sent 
+        }
+        token.issue(_contributor, tokenAmount);
+        tokenAmount = removeDecimals(tokenAmount);
+        totalTokenIssued = totalTokenIssued.add(tokenAmount);
+        sendShares();
+        Contribution(_contributor, _amount, tokenAmount);
+        return tokenAmount;
+    }
+
+    // remove decimals of the tokens
+    function removeDecimals(uint256 _amount) internal returns (uint256 newAmount) {
+        uint256 divider;
+
+        if (decimals == 0) {
+            divider  = 10 ** 18;
+            newAmount = _amount.div(divider);
+        } else if (decimals == 18) {
+            newAmount = _amount;
+        } else {
+            divider = 10 ** (18 - decimals);
+            newAmount = _amount.div(divider);
+        }
+        return newAmount;
     }
 }
