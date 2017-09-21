@@ -68,7 +68,7 @@ contract Holdme is Ownable, UpgradeableStandard23Token {
     * @dev Function to stop issue new tokens.
     * @return True if the operation was successful.
     */
-    function finishIssuance() public onlyOwner returns (bool) {
+    function finishIssuance() public onlyOwner returns (bool success) {
         issuanceFinished = true;
         IssueFinished();
         return true;

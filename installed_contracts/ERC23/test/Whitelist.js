@@ -26,7 +26,7 @@ contract('Whitelist', function(accounts) {
         console.log("Whitelist #1. BEGIN==========================================================");
 
         let whitelists = await whitelist.getWhitelists();
-         console.log("Array of Whitelist = " +whitelists);
+        console.log("Array of Whitelist = " +whitelists);
 
         var ownerIsWhitelisted = await whitelist.checkWhitelisted(MAIN_ACCOUNT).should.be.fulfilled;
 

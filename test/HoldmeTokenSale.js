@@ -27,6 +27,9 @@ contract('HoldmeTokenSale', function(accounts) {
     let CONTRIBUTER = accounts[3];
     let BENIFICIARY = accounts[4];
     let DEVTEAM = accounts[5];
+    let whitelistAccount = accounts[9];
+
+    const WHITELISTS_TESTRPC = [MAIN_ACCOUNT, whitelistAccount]; 
   
  	const INITAL_SUPPLY = 0;
     const CONTRIBUTE_AMOUNT = ether(1);
@@ -54,7 +57,7 @@ contract('HoldmeTokenSale', function(accounts) {
     	tokenAddress = token.address;
 		console.log("tokenAddress =  " +tokenAddress);
 
-		tokenSale = await HoldmeTokenSale.new(tokenAddress, MAIN_ACCOUNT, startTimeSale, endTimeSale, BENIFICIARY, DEVTEAM, tokenDecimals);
+		tokenSale = await HoldmeTokenSale.new(tokenAddress, MAIN_ACCOUNT, startTimeSale, endTimeSale, BENIFICIARY, DEVTEAM, WHITELISTS_TESTRPC, tokenDecimals);
 		tokenSaleAddress = tokenSale.address;
 		console.log("tokenSaleAddress =  " +tokenSaleAddress);
 
@@ -94,7 +97,6 @@ contract('HoldmeTokenSale', function(accounts) {
         console.log("The Token decimals should be equal to " +decimals);
         assert.equal(decimals, tokenDecimals);
         
-
         let mainAccountBalance = await token.balanceOf(MAIN_ACCOUNT);
         console.log("The token balance of the MAIN_ACCOUNT  should be " +INITAL_SUPPLY);
         assert.equal(mainAccountBalance, INITAL_SUPPLY);
@@ -106,6 +108,9 @@ contract('HoldmeTokenSale', function(accounts) {
         let devTeamBalance = await token.balanceOf(DEVTEAM);
         console.log("The token balance of the developer team  should be equal to " +devTeamBalance);
         assert.equal(devTeamBalance, 0);
+
+        let whitelists = await tokenSale.getWhitelists();
+        console.log("Array of Whitelist = " +whitelists);
     	
 	});
 
@@ -195,8 +200,33 @@ contract('HoldmeTokenSale', function(accounts) {
         console.log("ethContributerBalanceAfterInvestment = " +ethContributerBalanceAfterInvestment);
 
     });
-    /*
-    it("HoldmeTokenSale #5 should able send shares after end sales", async function() {
+
+    it("HoldmeTokenSale #5 should able to call contributeCoins for whitelisted accounts", async function() {
+        console.log("HoldmeTokenSale #5. BEGIN==========================================================");
+
+        let start = await tokenSale.setStartTime(startTimeInProgress);
+        let end = await tokenSale.setEndTime(endTimeInProgress);
+
+        let getStartTimeSale = await tokenSale.startTime();
+        console.log("getStartTimeSale in progress = " +startTimeInProgress);
+        assert.equal(getStartTimeSale, startTimeInProgress);
+
+        let getEndTimeSale = await tokenSale.endTime();
+        console.log("getEndTimeSale  in progress = " +endTimeInProgress);
+        assert.equal(getEndTimeSale, endTimeInProgress);
+
+      
+        var sale = await tokenSale.contributeCoins(CONTRIBUTER, CONTRIBUTE_AMOUNT, {from : whitelistAccount});
+
+        var totalTokenIssued = await tokenSale.totalTokenIssued();
+        console.log("totalTokenIssued = " +totalTokenIssued);
+
+        const contributerTokenBalanceAfterInvestments = await token.balanceOf(CONTRIBUTER);
+        console.log("contributerTokenBalanceAfterInvestments = " +contributerTokenBalanceAfterInvestments);
+
+    });
+    
+    it("HoldmeTokenSale #6 should able send ether  after start the token sale", async function() {
         console.log("HoldmeTokenSale #6. BEGIN==========================================================");
 
         let start = await tokenSale.setStartTime(startTimeInProgress);
@@ -213,12 +243,40 @@ contract('HoldmeTokenSale', function(accounts) {
         const ethContributerBalanceBeforeInvestment = await web3.eth.getBalance(CONTRIBUTER);
         console.log("ethContributerBalanceBeforeInvestment = " +ethContributerBalanceBeforeInvestment);
 
-        var sale = await tokenSale.contributeETH(CONTRIBUTER, {value: web3.toWei(1, 'ether')});
-        //console.log(sale);
+        const {logs} = await tokenSale.sendTransaction({value: CONTRIBUTE_AMOUNT, from: CONTRIBUTER});
 
         const contributerTokenBalanceAfterInvestments = await token.balanceOf(CONTRIBUTER);
         console.log("contributerTokenBalanceAfterInvestments = " +contributerTokenBalanceAfterInvestments);
 
+        const ethContributerBalanceAfterInvestment = await web3.eth.getBalance(CONTRIBUTER);
+        console.log("ethContributerBalanceAfterInvestment = " +ethContributerBalanceAfterInvestment);
+
+        var totalTokenIssued = await tokenSale.totalTokenIssued();
+        console.log("totalTokenIssued = " +totalTokenIssued);
+        
+    });
+
+    it("HoldmeTokenSale #7 should not be able to send ether after end sale", async function() {
+        console.log("HoldmeTokenSale #7. BEGIN==========================================================");
+
+        let start = await tokenSale.setStartTime(startTimeInProgress);
+        let end = await tokenSale.setEndTime(endTimeInProgress);
+
+        let getStartTimeSale = await tokenSale.startTime();
+        console.log("getStartTimeSale in progress = " +getStartTimeSale);
+        assert.equal(getStartTimeSale, startTimeInProgress);
+
+        let getEndTimeSale = await tokenSale.endTime();
+        console.log("getEndTimeSale  in progress = " +getEndTimeSale);
+        assert.equal(getEndTimeSale, endTimeInProgress);
+
+        const ethContributerBalanceBeforeInvestment = await web3.eth.getBalance(CONTRIBUTER);
+        console.log("ethContributerBalanceBeforeInvestment = " +ethContributerBalanceBeforeInvestment);
+
+        const {logs} = await tokenSale.sendTransaction({value: CONTRIBUTE_AMOUNT, from: CONTRIBUTER});
+
+        const contributerTokenBalanceAfterInvestments = await token.balanceOf(CONTRIBUTER);
+        console.log("contributerTokenBalanceAfterInvestments = " +contributerTokenBalanceAfterInvestments);
 
         const ethContributerBalanceAfterInvestment = await web3.eth.getBalance(CONTRIBUTER);
         console.log("ethContributerBalanceAfterInvestment = " +ethContributerBalanceAfterInvestment);
@@ -229,21 +287,13 @@ contract('HoldmeTokenSale', function(accounts) {
         let finish = await tokenSale.setEndTime(endTimeFinished);
         console.log("finish = " +endTimeFinished);
 
+        await tokenSale.finalize();
 
-       // await tokenSale.finalize();
-
-        var totalTokenIssuedAfterFinish = await tokenSale.totalTokenIssued();
-        console.log("totalTokenIssuedAfterFinish = " +totalTokenIssuedAfterFinish);
-
-        const beneficiaryBalanceAfterFinish = await token.balanceOf(beneficiary);
-        console.log("beneficiaryBalanceAfterFinish = " +beneficiaryBalanceAfterFinish);
-
-        //const devTeamBalanceAfterFinish = await token.balanceOf(DEVTEAM);
-        //console.log("devTeamBalanceAfterFinish = " +devTeamBalanceAfterFinish);
-
-        //const ownerBalanceAfterFinish = await token.balanceOf(MAIN_ACCOUNT);
-        //console.log("ownerBalanceAfterFinish = " +ownerBalanceAfterFinish);
-        
-    });*/
+        try {
+            await tokenSale.contributeETH({from: CONTRIBUTER,value: web3.toWei(1, 'ether')});
+        } catch(error) {
+            return assertJump(error);
+        }
+    });
 
 });	

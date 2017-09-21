@@ -44,12 +44,14 @@ contract HoldmeTokenSale is TokenController, Pausable {
 
     uint256 public decimals;
 
+
     // triggered on each contribution
     event Contribution(address indexed _contributor, uint256 _amount, uint256 _return);
     event Finalized();
 
-    function HoldmeTokenSale (Holdme _token, address _centralAdmin, uint256 _startTime, uint256 _endTime, address _beneficiary, address _devTeam, uint256 _decimals)
+    function HoldmeTokenSale (Holdme _token, address _centralAdmin, uint256 _startTime, uint256 _endTime, address _beneficiary, address _devTeam, address[] _whitelists ,uint256 _decimals)
         TokenController(_token)
+        Whitelist(_whitelists, maxAddresses)
     { 
 
         if (_centralAdmin != 0) {
@@ -125,7 +127,8 @@ contract HoldmeTokenSale is TokenController, Pausable {
         greaterThanZero(msg.value)
         returns (uint256 amount)
     {
-        return processContribution(msg.sender, msg.value);
+        uint256 realEther = 1;
+        return processContribution(msg.sender, msg.value, realEther);
     }
 
 
@@ -138,12 +141,13 @@ contract HoldmeTokenSale is TokenController, Pausable {
     */
     function contributeCoins(address _contributor, uint256 _amount)
         public
-        onlyOwner
+        addressWhitelisted(msg.sender)
         validAddress(_contributor)
         greaterThanZero(_amount)
         returns (uint256 amount)
     {
-        return processContribution(_contributor, _amount);
+        uint256 realEther = 0;
+        return processContribution(_contributor, _amount, realEther);
     }
 
     /**
@@ -152,13 +156,15 @@ contract HoldmeTokenSale is TokenController, Pausable {
 
         @return tokens issued in return
     */
-    function processContribution(address _contributor, uint256 _amount) private returns (uint256 amount) {
-        uint256 tokenAmount = computeReturn(msg.value);
-        totalEtherContributed = totalEtherContributed.add(msg.value);// update the total contribution amount
+    function processContribution(address _contributor, uint256 _amount, uint256 _realEther) private returns (uint256 amount) {
+        uint256 tokenAmount = computeReturn(_amount);
+        if (_realEther == 1 && msg.value > 0) {
+            totalEtherContributed = totalEtherContributed.add(msg.value);// update the total contribution amount, only update when real ether has been sent 
+        }
         totalTokenIssued = totalTokenIssued.add(tokenAmount);
-        token.issue(msg.sender, tokenAmount);
+        token.issue(_contributor, tokenAmount);
         sendShares();
-        Contribution(msg.sender, msg.value, tokenAmount);
+        Contribution(_contributor, _amount, tokenAmount);
         return tokenAmount;
     }
 
