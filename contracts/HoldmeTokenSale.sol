@@ -125,7 +125,25 @@ contract HoldmeTokenSale is TokenController, Pausable {
         greaterThanZero(msg.value)
         returns (uint256 amount)
     {
-        return processContribution();
+        return processContribution(msg.sender, msg.value);
+    }
+
+
+    /**
+        @dev COINS contribution
+        can only be called during the crowdsale
+        only by whitelisted address
+
+        @return tokens issued in return
+    */
+    function contributeCoins(address _contributor, uint256 _amount)
+        public
+        onlyOwner
+        validAddress(_contributor)
+        greaterThanZero(_amount)
+        returns (uint256 amount)
+    {
+        return processContribution(_contributor, _amount);
     }
 
     /**
@@ -134,7 +152,7 @@ contract HoldmeTokenSale is TokenController, Pausable {
 
         @return tokens issued in return
     */
-    function processContribution() private returns (uint256 amount) {
+    function processContribution(address _contributor, uint256 _amount) private returns (uint256 amount) {
         uint256 tokenAmount = computeReturn(msg.value);
         totalEtherContributed = totalEtherContributed.add(msg.value);// update the total contribution amount
         totalTokenIssued = totalTokenIssued.add(tokenAmount);
